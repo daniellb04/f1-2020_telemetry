@@ -2,11 +2,12 @@ package com.eh7n.f1telemetry.data;
 
 import java.util.List;
 
-import com.eh7n.f1telemetry.data.elements.Era;
+import com.eh7n.f1telemetry.data.elements.Formula;
 import com.eh7n.f1telemetry.data.elements.MarshalZone;
 import com.eh7n.f1telemetry.data.elements.SafetyCarStatus;
 import com.eh7n.f1telemetry.data.elements.SessionType;
 import com.eh7n.f1telemetry.data.elements.Weather;
+import com.eh7n.f1telemetry.data.elements.WeatherForecastSample;
 
 public class PacketSessionData extends Packet {
 
@@ -17,7 +18,7 @@ public class PacketSessionData extends Packet {
 	private int trackLength;
 	private SessionType sessionType;
 	private int trackId;
-	private Era era;
+	private Formula formula;
 	private int sessionTimeLeft;
 	private int sessionDuration;
 	private int pitSpeedLimit;
@@ -29,6 +30,8 @@ public class PacketSessionData extends Packet {
 	private List<MarshalZone> marshalZones;
 	private SafetyCarStatus safetyCarStatus;
 	private boolean networkGame;
+	private int numWeatherForecastSamples;
+	private List<WeatherForecastSample> weatherForecastSamples;
 	
 	public PacketSessionData() {}
 
@@ -88,12 +91,12 @@ public class PacketSessionData extends Packet {
 		this.trackId = trackId;
 	}
 
-	public Era getEra() {
-		return era;
+	public Formula getFormula() {
+		return formula;
 	}
 
-	public void setEra(Era era) {
-		this.era = era;
+	public void setFormula(Formula era) {
+		this.formula = era;
 	}
 
 	public int getSessionTimeLeft() {
@@ -182,6 +185,22 @@ public class PacketSessionData extends Packet {
 
 	public void setNetworkGame(boolean networkGame) {
 		this.networkGame = networkGame;
+	}
+
+	public int getNumWeatherForecastSamples() {
+		return numWeatherForecastSamples;
+	}
+
+	public void setNumWeatherForecastSamples(int numWeatherForecastSamples) {
+		this.numWeatherForecastSamples = numWeatherForecastSamples;
+	}
+
+	public List<WeatherForecastSample> getWeatherForecastSamples() {
+		return weatherForecastSamples;
+	}
+
+	public void setWeatherForecastSamples(List<WeatherForecastSample> weatherForecastSamples) {
+		this.weatherForecastSamples = weatherForecastSamples;
 	}
 
 }

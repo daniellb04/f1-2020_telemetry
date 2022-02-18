@@ -18,7 +18,8 @@ import com.eh7n.f1telemetry.data.elements.CarSetupData;
 import com.eh7n.f1telemetry.data.elements.CarStatusData;
 import com.eh7n.f1telemetry.data.elements.CarTelemetryData;
 import com.eh7n.f1telemetry.data.elements.DriverStatus;
-import com.eh7n.f1telemetry.data.elements.Era;
+import com.eh7n.f1telemetry.data.elements.EventType;
+import com.eh7n.f1telemetry.data.elements.Formula;
 import com.eh7n.f1telemetry.data.elements.Header;
 import com.eh7n.f1telemetry.data.elements.LapData;
 import com.eh7n.f1telemetry.data.elements.MarshalZone;
@@ -28,35 +29,38 @@ import com.eh7n.f1telemetry.data.elements.ResultStatus;
 import com.eh7n.f1telemetry.data.elements.SafetyCarStatus;
 import com.eh7n.f1telemetry.data.elements.SessionType;
 import com.eh7n.f1telemetry.data.elements.Weather;
+import com.eh7n.f1telemetry.data.elements.WeatherForecastSample;
 import com.eh7n.f1telemetry.data.elements.WheelData;
 import com.eh7n.f1telemetry.data.elements.ZoneFlag;
 
 /**
- * F1 2018 PacketDeserializer is the main class for deserializing the incoming
+ * F1 2020 PacketDeserializer is the main class for deserializing the incoming
  * UDP packets and building Packet POJOs from the byte arrays
  * 
  * This class was created based on the documented UDP Specification located on
  * the Codemasters forums.
  * 
  * @author eh7n
- * @see https://forums.codemasters.com/discussion/136948/f1-2018-udp-specification
+ * @see https://forums.codemasters.com/topic/50942-f1-2020-udp-specification
  *
  */
 public class PacketDeserializer {
 	
-	public static final int TOTAL_NBR_CARS=20;
+	public static final int MAX_NBR_CARS=22;
 	public static final int MAX_NBR_MARSHAL_ZONES=21;
+	public static final int MAX_WEATHER_FORECAST_SAMPLES=20;
 
 	private PacketBuffer buffer;
 
 	private PacketDeserializer(byte[] data) {
 		buffer = PacketBuffer.wrap(data);
+		System.out.println(buffer);
 	}
 
 	/**
 	 * Read the packet data from a byte array
 	 * 
-	 * @param data : a F1 2018 UDP packet
+	 * @param data : a F1 2020 UDP packet
 	 * @return a Packet POJO
 	 */
 	public static Packet read(byte[] data) {
@@ -76,6 +80,7 @@ public class PacketDeserializer {
 			return buildPacketLapData(header);
 		case 3:
 			return buildPacketEventData(header);
+			/*
 		case 4:
 			return buildPacketParticipantsData(header);
 		case 5:
@@ -84,6 +89,11 @@ public class PacketDeserializer {
 			return buildPacketCarTelemetryData(header);
 		case 7:
 			return buildPacketCarStatusData(header);
+		case 8:
+			return null; //buildPacketFinalClassificationData(header);
+		case 9:
+			return null; //buildPacketLobbyInfoData(header);
+			*/
 		}
 
 		return null;
@@ -98,13 +108,15 @@ public class PacketDeserializer {
 	 * {@code 
 	 	struct PacketHeader
 		{
-			uint16    m_packetFormat;         // 2018
-			uint8     m_packetVersion;        // Version of this packet type, all start from 1
-			uint8     m_packetId;             // Identifier for the packet type, see below
-			uint64    m_sessionUID;           // Unique identifier for the session
-			float     m_sessionTime;          // Session timestamp
-			uint      m_frameIdentifier;      // Identifier for the frame the data was retrieved on
-			uint8     m_playerCarIndex;       // Index of player's car in the array
+			uint16	m_packetFormat;		// 2020
+			uint8	m_gameMajorVersion;	// Game major version - "X.00"
+			uint8	m_gameMinorVersion;	// Game minor version - "1.XX"
+			uint8	m_packetVersion;	// Version of this packet type, all start from 1
+			uint8	m_packetId;			// Identifier for the packet type, see below
+			uint64	m_sessionUID;		// Unique identifier for the session
+			float	m_sessionTime;		// Session timestamp
+			uint32	m_frameIdentifier;	// Identifier for the frame the data was retrieved on
+			uint8	m_playerCarIndex;	// Index of player's car in the array
 		};
 	 * }
 	 * </pre>
@@ -116,6 +128,8 @@ public class PacketDeserializer {
 		Header header = new Header();
 
 		header.setPacketFormat(buffer.getNextUInt16AsInt()); // 2
+		header.setGameMajorVersion(buffer.getNextUInt8AsInt());
+		header.setGameMinorVersion(buffer.getNextUInt8AsInt());
 		header.setPacketVersion(buffer.getNextUInt8AsInt()); // 1
 		header.setPacketId(buffer.getNextUInt8AsInt()); // 1
 		header.setSessionUID(buffer.getNextUInt64AsBigInteger()); // 8
@@ -132,14 +146,14 @@ public class PacketDeserializer {
 	 * 
 	 * Frequency: Rate as specified in menus
 	 * 
-	 * Size: 841 bytes
+	 * Size: 1190 bytes
 	 * 
 	 * <pre>
 	 * {@code 
 		struct PacketLapData
 		{
 			PacketHeader    m_header;              // Header
-			LapData         m_lapData[20];         // Lap data for all cars on track
+			LapData         m_lapData[22];         // Lap data for all cars on track
 		};
 	 * }
 	 * </pre>
@@ -153,7 +167,7 @@ public class PacketDeserializer {
 
 		int i = 0;
 		int playersIndex = header.getPlayerCarIndex();
-		while (i < TOTAL_NBR_CARS) {
+		while (i < MAX_NBR_CARS) {
 			lapDataList.add(buildLapData(i, i == playersIndex));
 			i++;
 		}
@@ -204,9 +218,21 @@ public class PacketDeserializer {
 		lapData.setPlayersCar(playersCar);
 		lapData.setLastLapTime(buffer.getNextFloat());
 		lapData.setCurrentLapTime(buffer.getNextFloat());
-		lapData.setBestLaptTime(buffer.getNextFloat());
-		lapData.setSector1Time(buffer.getNextFloat());
-		lapData.setSector2Time(buffer.getNextFloat());
+		lapData.setSector1TimeInMS(buffer.getNextUInt16AsInt());
+		lapData.setSector2TimeInMS(buffer.getNextUInt16AsInt());
+		lapData.setBestLapTime(buffer.getNextFloat());
+		lapData.setBestLapNum(buffer.getNextUInt8AsInt());
+		
+		lapData.setBestLapSector1TimeInMS(buffer.getNextUInt16AsInt());
+		lapData.setBestLapSector2TimeInMS(buffer.getNextUInt16AsInt());
+		lapData.setBestLapSector3TimeInMS(buffer.getNextUInt16AsInt());
+		lapData.setBestOverallSector1TimeInMS(buffer.getNextUInt16AsInt());
+		lapData.setBestOverallSector1LapNum(buffer.getNextUInt8AsInt());
+		lapData.setBestOverallSector2TimeInMS(buffer.getNextUInt16AsInt());
+		lapData.setBestOverallSector2LapNum(buffer.getNextUInt8AsInt());
+		lapData.setBestOverallSector3TimeInMS(buffer.getNextUInt16AsInt());
+		lapData.setBestOverallSector3LapNum(buffer.getNextUInt8AsInt());
+		
 		lapData.setLapDistance(buffer.getNextFloat());
 		lapData.setTotalDistance(buffer.getNextFloat());
 		lapData.setSafetyCarDelta(buffer.getNextFloat());
@@ -272,7 +298,7 @@ public class PacketDeserializer {
 		List<CarMotionData> carMotionDataList = new ArrayList<>();
 		int carIndex = 0;
 		int playersCarIndex = packetMotionData.getHeader().getPlayerCarIndex();
-		while (carIndex < TOTAL_NBR_CARS) {
+		while (carIndex < MAX_NBR_CARS) {
 			carMotionDataList.add(buildCarMotionData(carIndex, carIndex == playersCarIndex));
 			carIndex++;
 		}
@@ -367,7 +393,7 @@ public class PacketDeserializer {
 	 * 
 	 * Frequency: 2 per second
 	 * 
-	 * Size: 147 bytes
+	 * Size: 251 bytes
 	 * 
 	 * <pre>
 	 * {@code 
@@ -414,7 +440,7 @@ public class PacketDeserializer {
 		sessionData.setTrackLength(buffer.getNextUInt16AsInt());
 		sessionData.setSessionType(SessionType.fromInt(buffer.getNextUInt8AsInt()));
 		sessionData.setTrackId(buffer.getNextInt8AsInt());
-		sessionData.setEra(Era.fromInt(buffer.getNextInt8AsInt()));
+		sessionData.setFormula(Formula.fromInt(buffer.getNextInt8AsInt()));
 		sessionData.setSessionTimeLeft(buffer.getNextUInt16AsInt());
 		sessionData.setSessionDuration(buffer.getNextUInt16AsInt());
 		sessionData.setPitSpeedLimit(buffer.getNextUInt8AsInt());
@@ -422,10 +448,11 @@ public class PacketDeserializer {
 		sessionData.setSpectating(buffer.getNextUInt8AsBoolean());
 		sessionData.setSliProNativeSupport(buffer.getNextUInt8AsBoolean());
 		sessionData.setNumMarshalZones(buffer.getNextInt8AsInt());
-		sessionData.setMarshalZones(buildMarshalZones());
+		sessionData.setMarshalZones(buildMarshalZones(sessionData.getNumMarshalZones()));
 		sessionData.setSafetyCarStatus(SafetyCarStatus.fromInt(buffer.getNextUInt8AsInt()));
 		sessionData.setNetworkGame(buffer.getNextUInt8AsBoolean());
-
+		sessionData.setNumWeatherForecastSamples(buffer.getNextInt8AsInt());
+		sessionData.setWeatherForecastSamples(buildWeatherForecastSamples(sessionData.getNumWeatherForecastSamples()));
 		return sessionData;
 	}
 
@@ -442,9 +469,11 @@ public class PacketDeserializer {
 	 * }
 	 * </pre>
 	 */
-	private List<MarshalZone> buildMarshalZones() {
+	private List<MarshalZone> buildMarshalZones(int numMarshalZones) {
 		List<MarshalZone> marshalZones = new ArrayList<>();
-		for (int k = 0; k < MAX_NBR_MARSHAL_ZONES; k++) {
+		int num = (numMarshalZones < MAX_NBR_MARSHAL_ZONES)?
+				numMarshalZones : MAX_NBR_MARSHAL_ZONES;
+		for (int k = 0; k < num; k++) {
 			MarshalZone marshalZone = new MarshalZone();
 			marshalZone.setZoneStart(buffer.getNextFloat());
 			marshalZone.setZoneFlag(ZoneFlag.fromInt(buffer.getNextInt8AsInt()));
@@ -454,6 +483,41 @@ public class PacketDeserializer {
 	}
 
 	/**
+	 * WEATHER FORECAST SAMPLES
+	 * 
+	 * <pre>
+	 * {@code 
+		struct WeatherForecastSample
+		{
+			uint8	m_sessionType;		// 0 = unknown, 1 = P1, 2 = P2, 3 = P3, 4 = Short P, 5 = Q1
+			          					// 6 = Q2, 7 = Q3, 8 = Short Q, 9 = OSQ, 10 = R, 11 = R2
+										// 12 = Time Trial
+			uint8	m_timeOffset;		// Time in minutes the forecast is for
+			uint8	m_weather;			// Weather - 0 = clear, 1 = light cloud, 2 = overcast
+										//           3 = light rain, 4 = heavy rain, 5 = storm
+			int8	m_trackTemperature;	// Track temp. in degrees celsius
+			int8	m_airTemperature;	// Air temp. in degrees celsius
+		};
+	 * }
+	 * </pre>
+	 */
+	private List<WeatherForecastSample> buildWeatherForecastSamples(int numWeatherForecastSamples) {
+		List<WeatherForecastSample> weatherForecastSamples = new ArrayList<>();
+		int num = (numWeatherForecastSamples < MAX_WEATHER_FORECAST_SAMPLES)?
+				numWeatherForecastSamples : MAX_WEATHER_FORECAST_SAMPLES;
+		for (int k = 0; k < num; k++) {
+			WeatherForecastSample weatherForecastSample = new WeatherForecastSample();
+			weatherForecastSample.setSessionType(SessionType.fromInt(buffer.getNextUInt8AsInt()));
+			weatherForecastSample.setTimeOffset(buffer.getNextUInt8AsInt());
+			weatherForecastSample.setWeather(Weather.fromInt(buffer.getNextUInt8AsInt()));
+			weatherForecastSample.setTrackTemperature(buffer.getNextInt8AsInt());
+			weatherForecastSample.setAirTemperature(buffer.getNextInt8AsInt());
+			weatherForecastSamples.add(weatherForecastSample);
+		}
+		return weatherForecastSamples;
+	}
+	
+	/**
 	 * EVENT PACKET
 	 * 
 	 * This packet gives details of events that happen during the course of the
@@ -461,15 +525,17 @@ public class PacketDeserializer {
 	 * 
 	 * Frequency: When the event occurs
 	 * 
-	 * Size: 25 bytes
+	 * Size: 35 bytes
 	 * 
 	 * <pre>
 	 * {@code 
 		struct PacketEventData
 		{
-		    PacketHeader    m_header;               // Header
+		    PacketHeader   		m_header;               // Header
 		    
-		    uint8           m_eventStringCode[4];   // Event string code, see above
+		    uint8           	m_eventStringCode[4];   // Event string code, see above
+		    EventDataDetails 	m_eventDetails; // Event details - should be interpreted differently
+		    									// for each type
 		};
 	 * }
 	 * </pre>
@@ -480,7 +546,8 @@ public class PacketDeserializer {
 	private PacketEventData buildPacketEventData(Header header) {
 		PacketEventData eventData = new PacketEventData();
 		eventData.setHeader(header);
-		eventData.setEventCode(buffer.getNextCharArrayAsString(4));
+		buffer.skip(1);
+		eventData.setEventCode(EventType.fromCode(buffer.getNextCharArrayAsString(4)));
 
 		return eventData;
 	}
@@ -586,7 +653,7 @@ public class PacketDeserializer {
 		PacketCarSetupData carSetupData = new PacketCarSetupData();
 		carSetupData.setHeader(header);
 		List<CarSetupData> carSetups = new ArrayList<>();
-		for (int k = 0; k < TOTAL_NBR_CARS; k++) {
+		for (int k = 0; k < MAX_NBR_CARS; k++) {
 			carSetups.add(buildCarSetupData());
 		}
 		carSetupData.setCarSetups(carSetups);
@@ -683,7 +750,7 @@ public class PacketDeserializer {
 		PacketCarTelemetryData packetCarTelemetry = new PacketCarTelemetryData();
 		packetCarTelemetry.setHeader(header);
 		List<CarTelemetryData> carsTelemetry = new ArrayList<>();
-		for (int k = 0; k < TOTAL_NBR_CARS; k++) {
+		for (int k = 0; k < MAX_NBR_CARS; k++) {
 			carsTelemetry.add(buildCarTelemetryData());
 		}
 		packetCarTelemetry.setButtonStatus(buildButtonStatus());
@@ -803,7 +870,7 @@ public class PacketDeserializer {
 
 		packetCarStatus.setHeader(header);
 		List<CarStatusData> carStatuses = new ArrayList<>();
-		for (int k = 0; k < TOTAL_NBR_CARS; k++) {
+		for (int k = 0; k < MAX_NBR_CARS; k++) {
 			carStatuses.add(buildCarStatusData());
 		}
 		packetCarStatus.setCarStatuses(carStatuses);

@@ -173,6 +173,7 @@ public class PacketBuffer {
 	 */
 	public String getNextCharArrayAsString(int count) {
 		char[] charArr = new char[count];
+		/*
 		boolean reachedEnd = false;
 		for (int k = 0; k < count; k++) {
 			char curr = (char) ba[i++];
@@ -181,6 +182,12 @@ public class PacketBuffer {
 			}else if (!reachedEnd) {
 				charArr[k] = curr;
 			}
+		}
+		*/
+		int k = 0;
+		while(k < count && i < ba.length) {
+			charArr[k++] = (char) ba[i++];
+			System.out.println(charArr);
 		}
 		return new String(charArr);
 
@@ -212,5 +219,19 @@ public class PacketBuffer {
 	public boolean hasNext() {
 		return i < (ba.length - 1);
 	}
+	
+	public void skip(int num) {
+		i += num;
+	}
 
+	public String toString() {
+		int count = ba.length;
+		char[] chars = new char[count];
+		for(int j = 0; j < count; j++) {
+			chars[j] = (char) ba[j];
+		}
+		return "Index: " + i + 
+				" - Lenght: " + count +
+				" - Data: " + new String(chars);
+	}
 }

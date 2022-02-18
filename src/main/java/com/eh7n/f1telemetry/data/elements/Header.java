@@ -5,7 +5,9 @@ import java.math.BigInteger;
 public class Header {
 	
 	private int packetFormat;
-	private long packetVersion;
+	private int gameMajorVersion;
+	private int gameMinorVersion;
+	private int packetVersion;
 	private int packetId;
 	private BigInteger sessionUID;
 	private float sessionTime;
@@ -22,11 +24,27 @@ public class Header {
 		this.packetFormat = packetFormat;
 	}
 	
-	public long getPacketVersion() {
+	public int getGameMajorVersion() {
+		return gameMajorVersion;
+	}
+
+	public void setGameMajorVersion(int gameMajorVersion) {
+		this.gameMajorVersion = gameMajorVersion;
+	}
+
+	public int getGameMinorVersion() {
+		return gameMinorVersion;
+	}
+
+	public void setGameMinorVersion(int gameMinorVersion) {
+		this.gameMinorVersion = gameMinorVersion;
+	}
+
+	public int getPacketVersion() {
 		return packetVersion;
 	}
 	
-	public void setPacketVersion(long packetVersion) {
+	public void setPacketVersion(int packetVersion) {
 		this.packetVersion = packetVersion;
 	}
 	
@@ -73,6 +91,7 @@ public class Header {
 	@Override
 	public String toString() {
 		return "Header :: packetFormat:" + this.getPacketFormat() + 
+		", game version:" + this.getGameMajorVersion() + '.' + this.getGameMinorVersion() +
 		", version:" + this.getPacketVersion() +
 		", packetId:" + this.getPacketId() + 
 		", sessionUID:" + this.getSessionUID() + 

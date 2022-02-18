@@ -21,8 +21,10 @@ public enum Weather {
 			return Weather.LIGHT_RAIN;
 		case 4:
 			return Weather.HEAVY_RAIN;
-		default:
+		case 5:
 			return Weather.STORM;
+		default:
+			return null;
 		}
 	}
 }

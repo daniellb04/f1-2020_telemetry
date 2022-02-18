@@ -16,8 +16,8 @@ import com.eh7n.f1telemetry.data.Packet;
 import com.eh7n.f1telemetry.util.PacketDeserializer;
 
 /**
- * The base class for the F1 2018 Telemetry app. Starts up a non-blocking I/O
- * UDP server to read packets from the F1 2018 video game and then hands those
+ * The base class for the F1 2020 Telemetry app. Starts up a non-blocking I/O
+ * UDP server to read packets from the F1 2020 video game and then hands those
  * packets off to a parallel thread for processing based on the lambda function
  * defined. Leverages a fluent API for initialization. 
  * 
@@ -26,9 +26,9 @@ import com.eh7n.f1telemetry.util.PacketDeserializer;
  * @author eh7n
  *
  */
-public class F12018TelemetryUDPServer {
+public class F12020TelemetryUDPServer {
 
-	private static final Logger log = LoggerFactory.getLogger(F12018TelemetryUDPServer.class);
+	private static final Logger log = LoggerFactory.getLogger(F12020TelemetryUDPServer.class);
 
 	private static final String DEFAULT_BIND_ADDRESS = "0.0.0.0";
 	private static final int DEFAULT_PORT = 20777;
@@ -38,7 +38,7 @@ public class F12018TelemetryUDPServer {
 	private int port;
 	private Consumer<Packet> packetConsumer;
 
-	private F12018TelemetryUDPServer() {
+	private F12020TelemetryUDPServer() {
 		bindAddress = DEFAULT_BIND_ADDRESS;
 		port = DEFAULT_PORT;
 	}
@@ -48,8 +48,8 @@ public class F12018TelemetryUDPServer {
 	 * 
 	 * @return
 	 */
-	public static F12018TelemetryUDPServer create() {
-		return new F12018TelemetryUDPServer();
+	public static F12020TelemetryUDPServer create() {
+		return new F12020TelemetryUDPServer();
 	}
 
 	/**
@@ -58,7 +58,7 @@ public class F12018TelemetryUDPServer {
 	 * @param bindAddress
 	 * @return the server instance
 	 */
-	public F12018TelemetryUDPServer bindTo(String bindAddress) {
+	public F12020TelemetryUDPServer bindTo(String bindAddress) {
 		this.bindAddress = bindAddress;
 		return this;
 	}
@@ -69,7 +69,7 @@ public class F12018TelemetryUDPServer {
 	 * @param port
 	 * @return the server instance
 	 */
-	public F12018TelemetryUDPServer onPort(int port) {
+	public F12020TelemetryUDPServer onPort(int port) {
 		this.port = port;
 		return this;
 	}
@@ -80,13 +80,13 @@ public class F12018TelemetryUDPServer {
 	 * @param consumer
 	 * @return the server instance
 	 */
-	public F12018TelemetryUDPServer consumeWith(Consumer<Packet> consumer) {
+	public F12020TelemetryUDPServer consumeWith(Consumer<Packet> consumer) {
 		packetConsumer = consumer;
 		return this;
 	}
 
 	/**
-	 * Start the F1 2018 Telemetry UDP server
+	 * Start the F1 2020 Telemetry UDP server
 	 * 
 	 * @throws IOException           if the server fails to start
 	 * @throws IllegalStateException if you do not define how the packets should be
@@ -98,7 +98,7 @@ public class F12018TelemetryUDPServer {
 			throw new IllegalStateException("You must define how the packets will be consumed.");
 		}
 
-		log.info("F1 2018 - Telemetry UDP Server");
+		log.info("F1 2020 - Telemetry UDP Server");
 
 		// Create an executor to process the Packets in a separate thread
 		// To be honest, this is probably an over-optimization due to the use of NIO,
@@ -134,7 +134,7 @@ public class F12018TelemetryUDPServer {
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
-		F12018TelemetryUDPServer.create()
+		F12020TelemetryUDPServer.create()
 							.bindTo("0.0.0.0")
 							.onPort(20777)
 							.consumeWith((p) -> {

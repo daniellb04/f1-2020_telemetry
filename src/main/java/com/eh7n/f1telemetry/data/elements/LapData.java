@@ -6,9 +6,21 @@ public class LapData {
 	private boolean playersCar;
 	private float lastLapTime;
 	private float currentLapTime;
-	private float bestLaptTime;
-	private float sector1Time;
-	private float sector2Time;
+	private int sector1TimeInMS;
+	private int sector2TimeInMS;
+	private float bestLapTime;
+	private int bestLapNum;
+	
+	private int bestLapSector1TimeInMS;
+	private int bestLapSector2TimeInMS;
+	private int bestLapSector3TimeInMS;
+	private int bestOverallSector1TimeInMS;
+	private int bestOverallSector1LapNum;
+	private int bestOverallSector2TimeInMS;
+	private int bestOverallSector2LapNum;
+	private int bestOverallSector3TimeInMS;
+	private int bestOverallSector3LapNum;
+	
 	private float lapDistance;
 	private float totalDistance;
 	private float safetyCarDelta;
@@ -48,23 +60,83 @@ public class LapData {
 	public void setCurrentLapTime(float currentLapTime) {
 		this.currentLapTime = currentLapTime;
 	}
-	public float getBestLaptTime() {
-		return bestLaptTime;
+	public int getSector1TimeInMS() {
+		return sector1TimeInMS;
 	}
-	public void setBestLaptTime(float bestLaptTime) {
-		this.bestLaptTime = bestLaptTime;
+	public void setSector1TimeInMS(int sector1TimeInMS) {
+		this.sector1TimeInMS = sector1TimeInMS;
 	}
-	public float getSector1Time() {
-		return sector1Time;
+	public int getSector2TimeInMS() {
+		return sector2TimeInMS;
 	}
-	public void setSector1Time(float sector1Time) {
-		this.sector1Time = sector1Time;
+	public void setSector2TimeInMS(int sector2TimeInMS) {
+		this.sector2TimeInMS = sector2TimeInMS;
 	}
-	public float getSector2Time() {
-		return sector2Time;
+	public float getBestLapTime() {
+		return bestLapTime;
 	}
-	public void setSector2Time(float sector2Time) {
-		this.sector2Time = sector2Time;
+	public void setBestLapTime(float bestLapTime) {
+		this.bestLapTime = bestLapTime;
+	}
+	public int getBestLapNum() {
+		return bestLapNum;
+	}
+	public void setBestLapNum(int bestLapNum) {
+		this.bestLapNum = bestLapNum;
+	}
+	public int getBestLapSector1TimeInMS() {
+		return bestLapSector1TimeInMS;
+	}
+	public void setBestLapSector1TimeInMS(int bestLapSector1TimeInMS) {
+		this.bestLapSector1TimeInMS = bestLapSector1TimeInMS;
+	}
+	public int getBestLapSector2TimeInMS() {
+		return bestLapSector2TimeInMS;
+	}
+	public void setBestLapSector2TimeInMS(int bestLapSector2TimeInMS) {
+		this.bestLapSector2TimeInMS = bestLapSector2TimeInMS;
+	}
+	public int getBestLapSector3TimeInMS() {
+		return bestLapSector3TimeInMS;
+	}
+	public void setBestLapSector3TimeInMS(int bestLapSector3TimeInMS) {
+		this.bestLapSector3TimeInMS = bestLapSector3TimeInMS;
+	}
+	public int getBestOverallSector1TimeInMS() {
+		return bestOverallSector1TimeInMS;
+	}
+	public void setBestOverallSector1TimeInMS(int bestOverallSector1TimeInMS) {
+		this.bestOverallSector1TimeInMS = bestOverallSector1TimeInMS;
+	}
+	public int getBestOverallSector1LapNum() {
+		return bestOverallSector1LapNum;
+	}
+	public void setBestOverallSector1LapNum(int bestOverallSector1LapNum) {
+		this.bestOverallSector1LapNum = bestOverallSector1LapNum;
+	}
+	public int getBestOverallSector2TimeInMS() {
+		return bestOverallSector2TimeInMS;
+	}
+	public void setBestOverallSector2TimeInMS(int bestOverallSector2TimeInMS) {
+		this.bestOverallSector2TimeInMS = bestOverallSector2TimeInMS;
+	}
+	public int getBestOverallSector2LapNum() {
+		return bestOverallSector2LapNum;
+	}
+	public void setBestOverallSector2LapNum(int bestOverallSector2LapNum) {
+		this.bestOverallSector2LapNum = bestOverallSector2LapNum;
+	}
+	public int getBestOverallSector3TimeInMS() {
+		return bestOverallSector3TimeInMS;
+	}
+	public void setBestOverallSector3TimeInMS(int bestOverallSector3TimeInMS) {
+		this.bestOverallSector3TimeInMS = bestOverallSector3TimeInMS;
+	}
+	public int getBestOverallSector3LapNum() {
+		return bestOverallSector3LapNum;
+	}
+	public void setBestOverallSector3LapNum(int bestOverallSector3LapNum) {
+		this.bestOverallSector3LapNum = bestOverallSector3LapNum;
 	}
 	public float getLapDistance() {
 		return lapDistance;
