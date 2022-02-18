@@ -5,14 +5,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public abstract class Packet {
 	
+	private PacketType type;
 	private Header header;
 
+	public PacketType getType() {
+		return type;
+	}
+	
 	public Header getHeader() {
 		return header;
 	}
 
 	public void setHeader(Header header) {
 		this.header = header;
+		this.type = PacketType.fromInt(header.getPacketId());
 	}
 
 	public String toJSON() {

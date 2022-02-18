@@ -2,15 +2,34 @@ package com.eh7n.f1telemetry.data.elements;
 
 public class ParticipantData {
 	
+	private int carIndex;
+	private boolean playersCar;
 	private boolean aiControlled;
 	private int driverId;
 	private int teamId;
 	private int raceNumber;
 	private int nationality;
 	private String name;
+	private boolean publicTelemetry;
 	
 	public ParticipantData() {}
 	
+	public int getCarIndex() {
+		return carIndex;
+	}
+
+	public void setCarIndex(int carIndex) {
+		this.carIndex = carIndex;
+	}
+
+	public boolean isPlayersCar() {
+		return playersCar;
+	}
+
+	public void setPlayersCar(boolean playersCar) {
+		this.playersCar = playersCar;
+	}
+
 	public boolean isAiControlled() {
 		return aiControlled;
 	}
@@ -46,6 +65,12 @@ public class ParticipantData {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	public boolean isPublicTelemetry() {
+		return publicTelemetry;
+	}
+	public void setPublicTelemetry(boolean publicTelemetry) {
+		this.publicTelemetry = publicTelemetry;
 	}
 
 }

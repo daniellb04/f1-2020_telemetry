@@ -13,6 +13,7 @@ public class Header {
 	private float sessionTime;
 	private long frameIdentifier;
 	private int playerCarIndex;
+	private int secondaryPlayerCarIndex;
 	
 	public Header() {}
 
@@ -88,6 +89,14 @@ public class Header {
 		this.playerCarIndex = playerCarIndex;
 	}
 	
+	public int getSecondaryPlayerCarIndex() {
+		return secondaryPlayerCarIndex;
+	}
+
+	public void setSecondaryPlayerCarIndex(int secondaryPlayerCarIndex) {
+		this.secondaryPlayerCarIndex = secondaryPlayerCarIndex;
+	}
+
 	@Override
 	public String toString() {
 		return "Header :: packetFormat:" + this.getPacketFormat() + 
@@ -97,6 +106,8 @@ public class Header {
 		", sessionUID:" + this.getSessionUID() + 
 		", sessionTime:" + this.getSessionTime() +
 		", frameIdentifier:" + this.getFrameIdentifier() +
-		", playerCarIndex:" + this.getPlayerCarIndex();
+		", playerCarIndex:" + this.getPlayerCarIndex() +
+		", secondaryPlayerCarIndex:" + this.getSecondaryPlayerCarIndex();
 	}
+
 }

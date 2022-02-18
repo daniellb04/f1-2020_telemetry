@@ -2,6 +2,8 @@ package com.eh7n.f1telemetry.data.elements;
 
 public class CarSetupData {
 
+	private int carIndex;
+	private boolean playersCar;
 	private int frontWing;
 	private int rearWing;
 	private int onThrottle;
@@ -18,12 +20,30 @@ public class CarSetupData {
 	private int rearSuspensionHeight;
 	private int brakePressure;
 	private int brakeBias;
-	private float frontTirePressure;
-	private float rearTirePressure;
+	private float frontLeftTirePressure;
+	private float frontRightTirePressure;
+	private float rearLeftTirePressure;
+	private float rearRightTirePressure;
 	private int ballast;
 	private float fuelLoad;
 
 	public CarSetupData() {
+	}
+
+	public int getCarIndex() {
+		return carIndex;
+	}
+
+	public void setCarIndex(int carIndex) {
+		this.carIndex = carIndex;
+	}
+
+	public boolean isPlayersCar() {
+		return playersCar;
+	}
+
+	public void setPlayersCar(boolean playersCar) {
+		this.playersCar = playersCar;
 	}
 
 	public int getFrontWing() {
@@ -154,20 +174,36 @@ public class CarSetupData {
 		this.brakeBias = brakeBias;
 	}
 
-	public float getFrontTirePressure() {
-		return frontTirePressure;
+	public float getFrontLeftTirePressure() {
+		return frontLeftTirePressure;
 	}
 
-	public void setFrontTirePressure(float frontTirePressure) {
-		this.frontTirePressure = frontTirePressure;
+	public void setFrontLeftTirePressure(float frontLeftTirePressure) {
+		this.frontLeftTirePressure = frontLeftTirePressure;
 	}
 
-	public float getRearTirePressure() {
-		return rearTirePressure;
+	public float getFrontRightTirePressure() {
+		return frontRightTirePressure;
 	}
 
-	public void setRearTirePressure(float rearTirePressure) {
-		this.rearTirePressure = rearTirePressure;
+	public void setFrontRightTirePressure(float frontRightTirePressure) {
+		this.frontRightTirePressure = frontRightTirePressure;
+	}
+
+	public float getRearLeftTirePressure() {
+		return rearLeftTirePressure;
+	}
+
+	public void setRearLeftTirePressure(float rearLeftTirePressure) {
+		this.rearLeftTirePressure = rearLeftTirePressure;
+	}
+
+	public float getRearRightTirePressure() {
+		return rearRightTirePressure;
+	}
+
+	public void setRearRightTirePressure(float rearRightTirePressure) {
+		this.rearRightTirePressure = rearRightTirePressure;
 	}
 
 	public int getBallast() {

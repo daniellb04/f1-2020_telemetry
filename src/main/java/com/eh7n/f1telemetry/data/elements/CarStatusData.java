@@ -2,36 +2,57 @@ package com.eh7n.f1telemetry.data.elements;
 
 public class CarStatusData {
 
+	private int carIndex;
+	private boolean playersCar;
 	private int tractionControl;
-	private boolean antiLockBrakes;
+	private boolean antiLockBrakesOn;
 	private int fuelMix;
 	private int frontBrakeBias;
 	private boolean pitLimiterOn;
 	private float fuelInTank;
 	private float fuelCapacity;
+	private float fuelRemainingLaps;
 	private int maxRpm;
 	private int idleRpm;
 	private int maxGears;
 	private int drsAllowed;
+	private int drsActivationDistance;
 	private WheelData<Integer> tiresWear;
-	private int tireCompound;
+	private int actualTyreCompound;
+	private int visualTyreCompound;
+	private int tyresAgeLaps;
 	private WheelData<Integer> tiresDamage;
-	private int frontLeftWheelDamage;
+	private int frontLeftWingDamage;
 	private int frontRightWingDamage;
 	private int rearWingDamage;
+	private boolean drsFault;
 	private int engineDamage;
 	private int gearBoxDamage;
-	private int exhaustDamage;
-	private int vehicleFiaFlags;
-	private float ersStoreEngery;
+	private ZoneFlag vehicleFiaFlags;
+	private float ersStoreEnergy;
 	private int ersDeployMode;
 	private float ersHarvestedThisLapMGUK;
 	private float ersHarvestedThisLapMGUH;
 	private float ersDeployedThisLap;
 
-
 	public CarStatusData() {}
 	
+	public int getCarIndex() {
+		return carIndex;
+	}
+
+	public void setCarIndex(int carIndex) {
+		this.carIndex = carIndex;
+	}
+
+	public boolean isPlayersCar() {
+		return playersCar;
+	}
+
+	public void setPlayersCar(boolean playersCar) {
+		this.playersCar = playersCar;
+	}
+
 	public int getTractionControl() {
 		return tractionControl;
 	}
@@ -40,12 +61,12 @@ public class CarStatusData {
 		this.tractionControl = tractionControl;
 	}
 
-	public boolean isAntiLockBrakes() {
-		return antiLockBrakes;
+	public boolean isAntiLockBrakesOn() {
+		return antiLockBrakesOn;
 	}
 
-	public void setAntiLockBrakes(boolean antiLockBrakes) {
-		this.antiLockBrakes = antiLockBrakes;
+	public void setAntiLockBrakesOn(boolean antiLockBrakesOn) {
+		this.antiLockBrakesOn = antiLockBrakesOn;
 	}
 
 	public int getFuelMix() {
@@ -88,6 +109,14 @@ public class CarStatusData {
 		this.fuelCapacity = fuelCapacity;
 	}
 
+	public float getFuelRemainingLaps() {
+		return fuelRemainingLaps;
+	}
+
+	public void setFuelRemainingLaps(float fuelRemainingLaps) {
+		this.fuelRemainingLaps = fuelRemainingLaps;
+	}
+
 	public int getMaxRpm() {
 		return maxRpm;
 	}
@@ -120,6 +149,14 @@ public class CarStatusData {
 		this.drsAllowed = drsAllowed;
 	}
 
+	public int getDrsActivationDistance() {
+		return drsActivationDistance;
+	}
+
+	public void setDrsActivationDistance(int drsActivationDistance) {
+		this.drsActivationDistance = drsActivationDistance;
+	}
+
 	public WheelData<Integer> getTiresWear() {
 		return tiresWear;
 	}
@@ -128,12 +165,28 @@ public class CarStatusData {
 		this.tiresWear = tiresWear;
 	}
 
-	public int getTireCompound() {
-		return tireCompound;
+	public int getActualTyreCompound() {
+		return actualTyreCompound;
 	}
 
-	public void setTireCompound(int tireCompound) {
-		this.tireCompound = tireCompound;
+	public void setActualTyreCompound(int actualTyreCompound) {
+		this.actualTyreCompound = actualTyreCompound;
+	}
+
+	public int getVisualTyreCompound() {
+		return visualTyreCompound;
+	}
+
+	public void setVisualTyreCompound(int visualTyreCompound) {
+		this.visualTyreCompound = visualTyreCompound;
+	}
+
+	public int getTyresAgeLaps() {
+		return tyresAgeLaps;
+	}
+
+	public void setTyresAgeLaps(int tyresAgeLaps) {
+		this.tyresAgeLaps = tyresAgeLaps;
 	}
 
 	public WheelData<Integer> getTiresDamage() {
@@ -144,12 +197,12 @@ public class CarStatusData {
 		this.tiresDamage = tiresDamage;
 	}
 
-	public int getFrontLeftWheelDamage() {
-		return frontLeftWheelDamage;
+	public int getFrontLeftWingDamage() {
+		return frontLeftWingDamage;
 	}
 
-	public void setFrontLeftWheelDamage(int frontLeftWheelDamage) {
-		this.frontLeftWheelDamage = frontLeftWheelDamage;
+	public void setFrontLeftWingDamage(int frontLeftWheelDamage) {
+		this.frontLeftWingDamage = frontLeftWheelDamage;
 	}
 
 	public int getFrontRightWingDamage() {
@@ -168,6 +221,14 @@ public class CarStatusData {
 		this.rearWingDamage = rearWingDamage;
 	}
 
+	public boolean isDrsFault() {
+		return drsFault;
+	}
+
+	public void setDrsFault(boolean drsFault) {
+		this.drsFault = drsFault;
+	}
+
 	public int getEngineDamage() {
 		return engineDamage;
 	}
@@ -184,28 +245,20 @@ public class CarStatusData {
 		this.gearBoxDamage = gearBoxDamage;
 	}
 
-	public int getExhaustDamage() {
-		return exhaustDamage;
-	}
-
-	public void setExhaustDamage(int exhaustDamage) {
-		this.exhaustDamage = exhaustDamage;
-	}
-
-	public int getVehicleFiaFlags() {
+	public ZoneFlag getVehicleFiaFlags() {
 		return vehicleFiaFlags;
 	}
 
-	public void setVehicleFiaFlags(int vehicleFiaFlags) {
+	public void setVehicleFiaFlags(ZoneFlag vehicleFiaFlags) {
 		this.vehicleFiaFlags = vehicleFiaFlags;
 	}
 
-	public float getErsStoreEngery() {
-		return ersStoreEngery;
+	public float getErsStoreEnergy() {
+		return ersStoreEnergy;
 	}
 
-	public void setErsStoreEngery(float ersStoreEngery) {
-		this.ersStoreEngery = ersStoreEngery;
+	public void setErsStoreEnergy(float ersStoreEnergy) {
+		this.ersStoreEnergy = ersStoreEnergy;
 	}
 
 	public int getErsDeployMode() {

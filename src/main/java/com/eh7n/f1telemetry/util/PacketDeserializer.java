@@ -12,22 +12,29 @@ import com.eh7n.f1telemetry.data.PacketLapData;
 import com.eh7n.f1telemetry.data.PacketMotionData;
 import com.eh7n.f1telemetry.data.PacketParticipantsData;
 import com.eh7n.f1telemetry.data.PacketSessionData;
+import com.eh7n.f1telemetry.data.PacketType;
 import com.eh7n.f1telemetry.data.elements.ButtonStatus;
 import com.eh7n.f1telemetry.data.elements.CarMotionData;
 import com.eh7n.f1telemetry.data.elements.CarSetupData;
 import com.eh7n.f1telemetry.data.elements.CarStatusData;
 import com.eh7n.f1telemetry.data.elements.CarTelemetryData;
 import com.eh7n.f1telemetry.data.elements.DriverStatus;
+import com.eh7n.f1telemetry.data.elements.EventDataDetails;
 import com.eh7n.f1telemetry.data.elements.EventType;
+import com.eh7n.f1telemetry.data.elements.FastestLapEventDetails;
 import com.eh7n.f1telemetry.data.elements.Formula;
 import com.eh7n.f1telemetry.data.elements.Header;
+import com.eh7n.f1telemetry.data.elements.InfringementType;
 import com.eh7n.f1telemetry.data.elements.LapData;
 import com.eh7n.f1telemetry.data.elements.MarshalZone;
 import com.eh7n.f1telemetry.data.elements.ParticipantData;
+import com.eh7n.f1telemetry.data.elements.PenaltyEventDetails;
+import com.eh7n.f1telemetry.data.elements.PenaltyType;
 import com.eh7n.f1telemetry.data.elements.PitStatus;
 import com.eh7n.f1telemetry.data.elements.ResultStatus;
 import com.eh7n.f1telemetry.data.elements.SafetyCarStatus;
 import com.eh7n.f1telemetry.data.elements.SessionType;
+import com.eh7n.f1telemetry.data.elements.SpeedTrapEventDetails;
 import com.eh7n.f1telemetry.data.elements.Weather;
 import com.eh7n.f1telemetry.data.elements.WeatherForecastSample;
 import com.eh7n.f1telemetry.data.elements.WheelData;
@@ -51,6 +58,7 @@ public class PacketDeserializer {
 	public static final int MAX_WEATHER_FORECAST_SAMPLES=20;
 
 	private PacketBuffer buffer;
+	private int numParticipants = 0;
 
 	private PacketDeserializer(byte[] data) {
 		buffer = PacketBuffer.wrap(data);
@@ -71,29 +79,29 @@ public class PacketDeserializer {
 
 		Header header = buildHeader();
 
-		switch (header.getPacketId()) {
-		case 0:
-			return buildPacketMotionData(header);
-		case 1:
-			return buildPacketSessionData(header);
-		case 2:
-			return buildPacketLapData(header);
-		case 3:
-			return buildPacketEventData(header);
-			/*
-		case 4:
-			return buildPacketParticipantsData(header);
-		case 5:
-			return buildPacketCarSetupData(header);
-		case 6:
-			return buildPacketCarTelemetryData(header);
-		case 7:
-			return buildPacketCarStatusData(header);
-		case 8:
-			return null; //buildPacketFinalClassificationData(header);
-		case 9:
-			return null; //buildPacketLobbyInfoData(header);
-			*/
+		switch (PacketType.fromInt(header.getPacketId())) {
+			case MOTION:
+				return buildPacketMotionData(header);
+			case SESSION:
+				return buildPacketSessionData(header);
+			case LAP_DATA:
+				return buildPacketLapData(header);
+			case EVENT:
+				return buildPacketEventData(header);
+			case PARTICIPANTS:
+				return buildPacketParticipantsData(header);
+			case CAR_SETUP:
+				return buildPacketCarSetupData(header);
+			case CAR_TELEMETRY:
+				return buildPacketCarTelemetryData(header);
+			case CAR_STATUS:
+				return buildPacketCarStatusData(header);
+				/*
+			case FINAL_CLASSIFICATION:
+				return null; //buildPacketFinalClassificationData(header);
+			case LOBBY_INFO:
+				return null; //buildPacketLobbyInfoData(header);
+				*/
 		}
 
 		return null;
@@ -134,7 +142,7 @@ public class PacketDeserializer {
 		header.setPacketId(buffer.getNextUInt8AsInt()); // 1
 		header.setSessionUID(buffer.getNextUInt64AsBigInteger()); // 8
 		header.setSessionTime(buffer.getNextFloat());// 4
-		header.setFrameIdentifier(buffer.getNextUIntAsLong());// 4
+		header.setFrameIdentifier(buffer.getNextUInt32AsLong());// 4
 		header.setPlayerCarIndex(buffer.getNextUInt8AsInt()); // 1
 		return header;
 	}
@@ -167,7 +175,7 @@ public class PacketDeserializer {
 
 		int i = 0;
 		int playersIndex = header.getPlayerCarIndex();
-		while (i < MAX_NBR_CARS) {
+		while (i < this.numParticipants) {
 			lapDataList.add(buildLapData(i, i == playersIndex));
 			i++;
 		}
@@ -266,7 +274,7 @@ public class PacketDeserializer {
 		{
 		    PacketHeader    m_header;               	// Header
 		
-		    CarMotionData   m_carMotionData[20];		// Data for all cars on track
+		    CarMotionData   m_carMotionData[22];		// Data for all cars on track
 		
 		    // Extra player car ONLY data
 		    float         m_suspensionPosition[4];       // Note: All wheel arrays have the following order:
@@ -297,8 +305,8 @@ public class PacketDeserializer {
 		packetMotionData.setHeader(header);
 		List<CarMotionData> carMotionDataList = new ArrayList<>();
 		int carIndex = 0;
-		int playersCarIndex = packetMotionData.getHeader().getPlayerCarIndex();
-		while (carIndex < MAX_NBR_CARS) {
+		int playersCarIndex = header.getPlayerCarIndex();
+		while (carIndex < this.numParticipants) {
 			carMotionDataList.add(buildCarMotionData(carIndex, carIndex == playersCarIndex));
 			carIndex++;
 		}
@@ -440,18 +448,18 @@ public class PacketDeserializer {
 		sessionData.setTrackLength(buffer.getNextUInt16AsInt());
 		sessionData.setSessionType(SessionType.fromInt(buffer.getNextUInt8AsInt()));
 		sessionData.setTrackId(buffer.getNextInt8AsInt());
-		sessionData.setFormula(Formula.fromInt(buffer.getNextInt8AsInt()));
+		sessionData.setFormula(Formula.fromInt(buffer.getNextUInt8AsInt()));
 		sessionData.setSessionTimeLeft(buffer.getNextUInt16AsInt());
 		sessionData.setSessionDuration(buffer.getNextUInt16AsInt());
 		sessionData.setPitSpeedLimit(buffer.getNextUInt8AsInt());
 		sessionData.setGamePaused(buffer.getNextUInt8AsBoolean());
 		sessionData.setSpectating(buffer.getNextUInt8AsBoolean());
 		sessionData.setSliProNativeSupport(buffer.getNextUInt8AsBoolean());
-		sessionData.setNumMarshalZones(buffer.getNextInt8AsInt());
+		sessionData.setNumMarshalZones(buffer.getNextUInt8AsInt());
 		sessionData.setMarshalZones(buildMarshalZones(sessionData.getNumMarshalZones()));
 		sessionData.setSafetyCarStatus(SafetyCarStatus.fromInt(buffer.getNextUInt8AsInt()));
 		sessionData.setNetworkGame(buffer.getNextUInt8AsBoolean());
-		sessionData.setNumWeatherForecastSamples(buffer.getNextInt8AsInt());
+		sessionData.setNumWeatherForecastSamples(buffer.getNextUInt8AsInt());
 		sessionData.setWeatherForecastSamples(buildWeatherForecastSamples(sessionData.getNumWeatherForecastSamples()));
 		return sessionData;
 	}
@@ -547,9 +555,63 @@ public class PacketDeserializer {
 		PacketEventData eventData = new PacketEventData();
 		eventData.setHeader(header);
 		buffer.skip(1);
-		eventData.setEventCode(EventType.fromCode(buffer.getNextCharArrayAsString(4)));
-
+		eventData.setEventType(EventType.fromCode(buffer.getNextCharArrayAsString(4)));
+		eventData.setEventDetails(buildEventDataDetails(eventData.getEventType()));
 		return eventData;
+	}
+	
+	private EventDataDetails buildEventDataDetails(EventType eventType) {
+		if (eventType == null ||
+			EventType.SESSION_STARTED.equals(eventType) ||
+			EventType.SESSION_ENDED.equals(eventType) ||
+			EventType.DRS_ENABLED.equals(eventType) ||
+			EventType.DRS_DISABLED.equals(eventType) ||
+			EventType.CHEQUERED_FLAG.equals(eventType))
+			return null; // Events without details
+		
+		EventDataDetails data;
+		if (EventType.PENALTY_ISSUED.equals(eventType)) {
+			data = buildPenaltyEventDetails();
+		}
+		else {
+			int vehicleIdx = buffer.getNextUInt8AsInt();
+			switch(eventType) {
+				case FASTEST_LAP:
+					data = buildFastestLapEventDetails();
+					break;
+				case SPEED_TRAP_TRIGGERED:
+					data = buildSpeedTrapEventDetails();
+					break;
+				default:
+					data = new EventDataDetails();
+			}
+			data.setVehicleIdx(vehicleIdx);
+		}
+		return data;
+	}
+	
+	private FastestLapEventDetails buildFastestLapEventDetails() {
+		FastestLapEventDetails data = new FastestLapEventDetails();
+		data.setLapTime(buffer.getNextFloat());
+		return data;
+	}
+	
+	private PenaltyEventDetails buildPenaltyEventDetails() {
+		PenaltyEventDetails data = new PenaltyEventDetails();
+		data.setPenaltyType(PenaltyType.fromInt(buffer.getNextUInt8AsInt()));
+		data.setInfringementType(InfringementType.fromInt(buffer.getNextUInt8AsInt()));
+		data.setVehicleIdx(buffer.getNextUInt8AsInt());
+		data.setOtherVehicleIdx(buffer.getNextUInt8AsInt());
+		data.setTime(buffer.getNextUInt8AsInt());
+		data.setLapNum(buffer.getNextUInt8AsInt());
+		data.setPlacesGained(buffer.getNextUInt8AsInt());
+		return data;
+	}
+	
+	private SpeedTrapEventDetails buildSpeedTrapEventDetails() {
+		SpeedTrapEventDetails data = new SpeedTrapEventDetails();
+		data.setSpeed(buffer.getNextFloat());
+		return data;
 	}
 
 	/**
@@ -563,7 +625,7 @@ public class PacketDeserializer {
 	 * 
 	 * Frequency: Every 5 seconds
 	 * 
-	 * Size: 1082 bytes
+	 * Size: 1213 bytes
 	 * 
 	 * <pre>
 	 * {@code 
@@ -572,7 +634,7 @@ public class PacketDeserializer {
 		    PacketHeader    m_header;            // Header
 		
 		    uint8           m_numCars;           // Number of cars in the data
-		    ParticipantData m_participants[20];
+		    ParticipantData m_participants[22];
 		};	 
 	 * }
 	 * </pre>
@@ -585,14 +647,16 @@ public class PacketDeserializer {
 
 		PacketParticipantsData participantsData = new PacketParticipantsData();
 		participantsData.setHeader(header);
-		participantsData.setNumCars(buffer.getNextUInt8AsInt());
+		this.numParticipants = buffer.getNextUInt8AsInt();
+		participantsData.setNumActiveCars(this.numParticipants);
 		List<ParticipantData> participants = new ArrayList<>();
-		for (int k = 0; k < participantsData.getNumCars(); k++) {
-			participants.add(buildParticipantData());
+		for (int k = 0; k < this.numParticipants; k++) {
+			participants.add(buildParticipantData(k, k == header.getPlayerCarIndex()));
 		}
 		participantsData.setParticipants(participants);
 		// Ignore the rest of the data in the buffer
 		return participantsData;
+
 	}
 
 	/**
@@ -613,14 +677,17 @@ public class PacketDeserializer {
 	 * 
 	 * @return a ParticipantData pojo
 	 */
-	private ParticipantData buildParticipantData() {
+	private ParticipantData buildParticipantData(int carIndex, boolean playersCar) {
 		ParticipantData participant = new ParticipantData();
+		participant.setCarIndex(carIndex);
+		participant.setPlayersCar(playersCar);
 		participant.setAiControlled(buffer.getNextUInt8AsBoolean());
 		participant.setDriverId(buffer.getNextUInt8AsInt());
 		participant.setTeamId(buffer.getNextUInt8AsInt());
 		participant.setRaceNumber(buffer.getNextUInt8AsInt());
 		participant.setNationality(buffer.getNextUInt8AsInt());
 		participant.setName(buffer.getNextCharArrayAsString(48));
+		participant.setPublicTelemetry(buffer.getNextUInt8AsBoolean());
 		return participant;
 	}
 
@@ -631,9 +698,9 @@ public class PacketDeserializer {
 	 * in multiplayer games, other player cars will appear as blank, you will only
 	 * be able to see your car setup and AI cars.
 	 * 
-	 * Frequency: Every 5 seconds
+	 * Frequency: Every 2 seconds
 	 * 
-	 * Size: 841 bytes
+	 * Size: 1102 bytes
 	 * 
 	 * <pre>
 	 * {@code 
@@ -641,7 +708,7 @@ public class PacketDeserializer {
 		{
 		    PacketHeader    m_header;            // Header
 		
-		    CarSetupData    m_carSetups[20];
+		    CarSetupData    m_carSetups[22];
 		};
 	 * }
 	 * </pre>
@@ -653,8 +720,8 @@ public class PacketDeserializer {
 		PacketCarSetupData carSetupData = new PacketCarSetupData();
 		carSetupData.setHeader(header);
 		List<CarSetupData> carSetups = new ArrayList<>();
-		for (int k = 0; k < MAX_NBR_CARS; k++) {
-			carSetups.add(buildCarSetupData());
+		for (int k = 0; k < this.numParticipants; k++) {
+			carSetups.add(buildCarSetupData(k, k == header.getPlayerCarIndex()));
 		}
 		carSetupData.setCarSetups(carSetups);
 		return carSetupData;
@@ -683,9 +750,11 @@ public class PacketDeserializer {
 			uint8     m_rearSuspensionHeight;     // Rear ride height
 			uint8     m_brakePressure;            // Brake pressure (percentage)
 			uint8     m_brakeBias;                // Brake bias (percentage)
-			float     m_frontTyrePressure;        // Front tyre pressure (PSI)
-			float     m_rearTyrePressure;         // Rear tyre pressure (PSI)
-			uint8     m_ballast;                  // Ballast
+			float     m_rearLeftTyrePressure;     // Rear left tyre pressure (PSI)
+			float     m_rearRightTyrePressure;    // Rear right tyre pressure (PSI)
+			float     m_frontLeftTyrePressure;    // Front left tyre pressure (PSI)
+			float     m_frontRightTyrePressure;   // Front right tyre pressure (PSI)
+    		uint8     m_ballast;                  // Ballast
 			float     m_fuelLoad;                 // Fuel load
 		};
 	 * }
@@ -693,28 +762,32 @@ public class PacketDeserializer {
 	 * 
 	 * @return a CarSetupData pojo
 	 */
-	private CarSetupData buildCarSetupData() {
+	private CarSetupData buildCarSetupData(int carIndex, boolean playersCar) {
 		CarSetupData setupData = new CarSetupData();
-		setupData.setFrontWing(buffer.getNextUInt8AsInt()); // 1*
-		setupData.setRearWing(buffer.getNextUInt8AsInt()); // 2*
-		setupData.setOnThrottle(buffer.getNextUInt8AsInt()); // 3*
-		setupData.setOffThrottle(buffer.getNextUInt8AsInt()); // 4*
-		setupData.setFrontCamber(buffer.getNextFloat()); // 8 *
-		setupData.setRearCamber(buffer.getNextFloat()); // 16*
-		setupData.setFrontToe(buffer.getNextFloat()); // 24*
-		setupData.setRearToe(buffer.getNextFloat()); // 32*
-		setupData.setFrontSuspension(buffer.getNextUInt8AsInt()); // 33*
-		setupData.setRearSuspension(buffer.getNextUInt8AsInt()); // 34*
-		setupData.setFrontAntiRollBar(buffer.getNextUInt8AsInt()); // 35*
-		setupData.setRearAntiRollBar(buffer.getNextUInt8AsInt()); // 36*
-		setupData.setFrontSuspensionHeight(buffer.getNextUInt8AsInt()); // 37*
-		setupData.setRearSuspensionHeight(buffer.getNextUInt8AsInt()); // 38*
+		setupData.setCarIndex(carIndex);
+		setupData.setPlayersCar(playersCar);
+		setupData.setFrontWing(buffer.getNextUInt8AsInt());
+		setupData.setRearWing(buffer.getNextUInt8AsInt());
+		setupData.setOnThrottle(buffer.getNextUInt8AsInt());
+		setupData.setOffThrottle(buffer.getNextUInt8AsInt());
+		setupData.setFrontCamber(buffer.getNextFloat());
+		setupData.setRearCamber(buffer.getNextFloat());
+		setupData.setFrontToe(buffer.getNextFloat());
+		setupData.setRearToe(buffer.getNextFloat());
+		setupData.setFrontSuspension(buffer.getNextUInt8AsInt());
+		setupData.setRearSuspension(buffer.getNextUInt8AsInt());
+		setupData.setFrontAntiRollBar(buffer.getNextUInt8AsInt());
+		setupData.setRearAntiRollBar(buffer.getNextUInt8AsInt());
+		setupData.setFrontSuspensionHeight(buffer.getNextUInt8AsInt());
+		setupData.setRearSuspensionHeight(buffer.getNextUInt8AsInt());
 		setupData.setBrakePressure(buffer.getNextUInt8AsInt());
-		setupData.setBrakeBias(buffer.getNextUInt8AsInt()); // 39
-		setupData.setFrontTirePressure(buffer.getNextFloat()); // 47
-		setupData.setRearTirePressure(buffer.getNextFloat()); // 55
-		setupData.setBallast(buffer.getNextUInt8AsInt()); // 56
-		setupData.setFuelLoad(buffer.getNextFloat()); // 40
+		setupData.setBrakeBias(buffer.getNextUInt8AsInt());
+		setupData.setRearLeftTirePressure(buffer.getNextFloat());
+		setupData.setRearRightTirePressure(buffer.getNextFloat());
+		setupData.setFrontLeftTirePressure(buffer.getNextFloat());
+		setupData.setFrontRightTirePressure(buffer.getNextFloat());
+		setupData.setBallast(buffer.getNextUInt8AsInt());
+		setupData.setFuelLoad(buffer.getNextFloat());
 		return setupData;
 	}
 
@@ -727,7 +800,7 @@ public class PacketDeserializer {
 	 * 
 	 * Frequency: Rate as specified in menus
 	 * 
-	 * Size: 1085 bytes
+	 * Size: 1307 bytes
 	 * 
 	 * <pre>
 	 * {@code 
@@ -735,7 +808,7 @@ public class PacketDeserializer {
 		{
 		    PacketHeader        m_header;                // Header
 		
-		    CarTelemetryData    m_carTelemetryData[20];
+		    CarTelemetryData    m_carTelemetryData[22];
 		
 		    uint32              m_buttonStatus;         // Bit flags specifying which buttons are being
 		                                                // pressed currently - see appendices
@@ -750,11 +823,14 @@ public class PacketDeserializer {
 		PacketCarTelemetryData packetCarTelemetry = new PacketCarTelemetryData();
 		packetCarTelemetry.setHeader(header);
 		List<CarTelemetryData> carsTelemetry = new ArrayList<>();
-		for (int k = 0; k < MAX_NBR_CARS; k++) {
-			carsTelemetry.add(buildCarTelemetryData());
+		for (int k = 0; k < this.numParticipants; k++) {
+			carsTelemetry.add(buildCarTelemetryData(k, k == header.getPlayerCarIndex()));
 		}
-		packetCarTelemetry.setButtonStatus(buildButtonStatus());
 		packetCarTelemetry.setCarTelemetryData(carsTelemetry);
+		packetCarTelemetry.setButtonStatus(buildButtonStatus());
+		packetCarTelemetry.setMfdPanelIndex(buffer.getNextUInt8AsInt());
+		packetCarTelemetry.setMfdPanelIndexSecondaryPlayer(buffer.getNextUInt8AsInt());
+		packetCarTelemetry.setSuggestedGear(buffer.getNextInt8AsInt());
 		return packetCarTelemetry;
 	}
 
@@ -779,30 +855,32 @@ public class PacketDeserializer {
 		    uint16    m_tyresInnerTemperature[4];   // Tyres inner temperature (celsius)
 		    uint16    m_engineTemperature;          // Engine temperature (celsius)
 		    float     m_tyresPressure[4];           // Tyres pressure (PSI)
+		    uint8     m_surfaceType[4];             // Driving surface
 		};
 	 * }
 	 * </pre>
 	 * 
 	 * @return a CarTelemetryData pojo
 	 */
-	private CarTelemetryData buildCarTelemetryData() {
-
+	private CarTelemetryData buildCarTelemetryData(int carIndex, boolean playersCar) {
 		CarTelemetryData carTelemetry = new CarTelemetryData();
-
+		carTelemetry.setCarIndex(carIndex);
+		carTelemetry.setPlayersCar(playersCar);
 		carTelemetry.setSpeed(buffer.getNextUInt16AsInt());
-		carTelemetry.setThrottle(buffer.getNextUInt8AsInt());
-		carTelemetry.setSteer(buffer.getNextInt8AsInt());
-		carTelemetry.setBrake(buffer.getNextUInt8AsInt());
+		carTelemetry.setThrottle(buffer.getNextFloat());
+		carTelemetry.setSteer(buffer.getNextFloat());
+		carTelemetry.setBrake(buffer.getNextFloat());
 		carTelemetry.setClutch(buffer.getNextUInt8AsInt());
 		carTelemetry.setGear(buffer.getNextInt8AsInt());
 		carTelemetry.setEngineRpm(buffer.getNextUInt16AsInt());
-		carTelemetry.setDrs(buffer.getNextUInt8AsBoolean());
+		carTelemetry.setDrsOn(buffer.getNextUInt8AsBoolean());
 		carTelemetry.setRevLightsPercent(buffer.getNextUInt8AsInt());
-		carTelemetry.setBrakeTemperature(new WheelData<Integer>(buffer.getNextUInt16ArrayAsIntegerArray(4)));
-		carTelemetry.setTireSurfaceTemperature(new WheelData<Integer>(buffer.getNextUInt16ArrayAsIntegerArray(4)));
-		carTelemetry.setTireInnerTemperature(new WheelData<Integer>(buffer.getNextUInt16ArrayAsIntegerArray(4)));
+		carTelemetry.setBrakesTemperature(new WheelData<Integer>(buffer.getNextUInt16ArrayAsIntegerArray(4)));
+		carTelemetry.setTiresSurfaceTemperature(new WheelData<Integer>(buffer.getNextUInt8ArrayAsIntegerArray(4)));
+		carTelemetry.setTiresInnerTemperature(new WheelData<Integer>(buffer.getNextUInt8ArrayAsIntegerArray(4)));
 		carTelemetry.setEngineTemperature(buffer.getNextUInt16AsInt());
-		carTelemetry.setTirePressure(new WheelData<Float>(buffer.getNextFloatArray(4)));
+		carTelemetry.setTiresPressure(new WheelData<Float>(buffer.getNextFloatArray(4)));
+		carTelemetry.setSurfaceType(new WheelData<Integer>(buffer.getNextUInt8ArrayAsIntegerArray(4)));
 
 		return carTelemetry;
 	}
@@ -818,7 +896,7 @@ public class PacketDeserializer {
 	 */
 	private ButtonStatus buildButtonStatus() {
 		
-		long flags = buffer.getNextUIntAsLong();
+		long flags = buffer.getNextUInt32AsLong();
 		
 		ButtonStatus controller = new ButtonStatus();
 		controller.setCrossAPressed((flags & 0x0001) == 1);
@@ -848,7 +926,7 @@ public class PacketDeserializer {
 	 * 
 	 * Frequency: 2 per second
 	 * 
-	 * Size: 1061 bytes
+	 * Size: 1344 bytes
 	 * 
 	 * <pre>
 	 * {@code 
@@ -856,7 +934,7 @@ public class PacketDeserializer {
 		{
 		    PacketHeader        m_header;            // Header
 		
-		    CarStatusData       m_carStatusData[20];
+		    CarStatusData       m_carStatusData[22];
 		};
 	 * }
 	 * </pre>
@@ -870,8 +948,8 @@ public class PacketDeserializer {
 
 		packetCarStatus.setHeader(header);
 		List<CarStatusData> carStatuses = new ArrayList<>();
-		for (int k = 0; k < MAX_NBR_CARS; k++) {
-			carStatuses.add(buildCarStatusData());
+		for (int k = 0; k < this.numParticipants; k++) {
+			carStatuses.add(buildCarStatusData(k, k == header.getPlayerCarIndex()));
 		}
 		packetCarStatus.setCarStatuses(carStatuses);
 
@@ -892,27 +970,37 @@ public class PacketDeserializer {
 		    uint8       m_pitLimiterStatus;         // Pit limiter status - 0 = off, 1 = on
 		    float       m_fuelInTank;               // Current fuel mass
 		    float       m_fuelCapacity;             // Fuel capacity
+		    float       m_fuelRemainingLaps;        // Fuel remaining in terms of laps (value on MFD)
 		    uint16      m_maxRPM;                   // Cars max RPM, point of rev limiter
 		    uint16      m_idleRPM;                  // Cars idle RPM
 		    uint8       m_maxGears;                 // Maximum number of gears
 		    uint8       m_drsAllowed;               // 0 = not allowed, 1 = allowed, -1 = unknown
+		    uint16      m_drsActivationDistance;    // 0 = DRS not available, non-zero - DRS will be available in [X] metres
 		    uint8       m_tyresWear[4];             // Tyre wear percentage
-		    uint8       m_tyreCompound;             // Modern - 0 = hyper soft, 1 = ultra soft
-		                                            // 2 = super soft, 3 = soft, 4 = medium, 5 = hard
-		                                            // 6 = super hard, 7 = inter, 8 = wet
-		                                            // Classic - 0-6 = dry, 7-8 = wet
+		    uint8       m_actualTyreCompound;	    // F1 Modern - 16 = C5, 17 = C4, 18 = C3, 19 = C2, 20 = C1
+													// 7 = inter, 8 = wet
+													// F1 Classic - 9 = dry, 10 = wet
+													// F2 – 11 = super soft, 12 = soft, 13 = medium, 14 = hard
+													// 15 = wet
+
+		    uint8       m_visualTyreCompound;       // F1 visual (can be different from actual compound)
+                                                    // 16 = soft, 17 = medium, 18 = hard, 7 = inter, 8 = wet
+                                                    // F1 Classic – same as above
+                                                    // F2 – same as above
+
+            uint8       m_tyresAgeLaps;             // Age in laps of the current set of tyres
 		    uint8       m_tyresDamage[4];           // Tyre damage (percentage)
 		    uint8       m_frontLeftWingDamage;      // Front left wing damage (percentage)
 		    uint8       m_frontRightWingDamage;     // Front right wing damage (percentage)
 		    uint8       m_rearWingDamage;           // Rear wing damage (percentage)
-		    uint8       m_engineDamage;             // Engine damage (percentage)
+		    uint8       m_drsFault;                 // Indicator for DRS fault, 0 = OK, 1 = fault
+    	    uint8       m_engineDamage;             // Engine damage (percentage)
 		    uint8       m_gearBoxDamage;            // Gear box damage (percentage)
-		    uint8       m_exhaustDamage;            // Exhaust damage (percentage)
 		    int8        m_vehicleFiaFlags;          // -1 = invalid/unknown, 0 = none, 1 = green
 		                                            // 2 = blue, 3 = yellow, 4 = red
 		    float       m_ersStoreEnergy;           // ERS energy store in Joules
-		    uint8       m_ersDeployMode;            // ERS deployment mode, 0 = none, 1 = low, 2 = medium
-		                                            // 3 = high, 4 = overtake, 5 = hotlap
+		    uint8       m_ersDeployMode;            // ERS deployment mode, 0 = none, 1 = medium
+                                                    // 2 = overtake, 3 = hotlap
 		    float       m_ersHarvestedThisLapMGUK;  // ERS energy harvested this lap by MGU-K
 		    float       m_ersHarvestedThisLapMGUH;  // ERS energy harvested this lap by MGU-H
 		    float       m_ersDeployedThisLap;       // ERS energy deployed this lap
@@ -922,32 +1010,37 @@ public class PacketDeserializer {
 	 * 
 	 * @return a CarStatusData pojo
 	 */
-	private CarStatusData buildCarStatusData() {
+	private CarStatusData buildCarStatusData(int carIndex, boolean playersCar) {
 
 		CarStatusData carStatus = new CarStatusData();
-
+		carStatus.setCarIndex(carIndex);
+		carStatus.setPlayersCar(playersCar);
 		carStatus.setTractionControl(buffer.getNextUInt8AsInt());
-		carStatus.setAntiLockBrakes(buffer.getNextUInt8AsBoolean());
+		carStatus.setAntiLockBrakesOn(buffer.getNextUInt8AsBoolean());
 		carStatus.setFuelMix(buffer.getNextUInt8AsInt());
 		carStatus.setFrontBrakeBias(buffer.getNextUInt8AsInt());
 		carStatus.setPitLimiterOn(buffer.getNextUInt8AsBoolean());
 		carStatus.setFuelInTank(buffer.getNextFloat());
 		carStatus.setFuelCapacity(buffer.getNextFloat());
+		carStatus.setFuelRemainingLaps(buffer.getNextFloat());
 		carStatus.setMaxRpm(buffer.getNextUInt16AsInt());
 		carStatus.setIdleRpm(buffer.getNextUInt16AsInt());
 		carStatus.setMaxGears(buffer.getNextUInt8AsInt());
 		carStatus.setDrsAllowed(buffer.getNextUInt8AsInt());
+		carStatus.setDrsActivationDistance(buffer.getNextUInt16AsInt());
 		carStatus.setTiresWear(new WheelData<Integer>(buffer.getNextUInt8ArrayAsIntegerArray(4)));
-		carStatus.setTireCompound(buffer.getNextUInt8AsInt());
+		carStatus.setActualTyreCompound(buffer.getNextUInt8AsInt());
+		carStatus.setVisualTyreCompound(buffer.getNextUInt8AsInt());
+		carStatus.setTyresAgeLaps(buffer.getNextUInt8AsInt());
 		carStatus.setTiresDamage(new WheelData<Integer>(buffer.getNextUInt8ArrayAsIntegerArray(4)));
-		carStatus.setFrontLeftWheelDamage(buffer.getNextUInt8AsInt());
+		carStatus.setFrontLeftWingDamage(buffer.getNextUInt8AsInt());
 		carStatus.setFrontRightWingDamage(buffer.getNextUInt8AsInt());
 		carStatus.setRearWingDamage(buffer.getNextUInt8AsInt());
+		carStatus.setDrsFault(buffer.getNextUInt8AsBoolean());
 		carStatus.setEngineDamage(buffer.getNextUInt8AsInt());
 		carStatus.setGearBoxDamage(buffer.getNextUInt8AsInt());
-		carStatus.setExhaustDamage(buffer.getNextUInt8AsInt());
-		carStatus.setVehicleFiaFlags(buffer.getNextInt8AsInt());
-		carStatus.setErsStoreEngery(buffer.getNextFloat());
+		carStatus.setVehicleFiaFlags(ZoneFlag.fromInt(buffer.getNextInt8AsInt()));
+		carStatus.setErsStoreEnergy(buffer.getNextFloat());
 		carStatus.setErsDeployMode(buffer.getNextUInt8AsInt());
 		carStatus.setErsHarvestedThisLapMGUK(buffer.getNextFloat());
 		carStatus.setErsHarvestedThisLapMGUH(buffer.getNextFloat());

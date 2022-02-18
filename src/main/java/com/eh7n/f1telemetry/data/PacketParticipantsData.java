@@ -6,16 +6,16 @@ import com.eh7n.f1telemetry.data.elements.ParticipantData;
 
 public class PacketParticipantsData extends Packet {
 	
-	private int numCars;
+	private int numActiveCars;
 	private List<ParticipantData> participants;
 	
 	public PacketParticipantsData() {}
 	
-	public int getNumCars() {
-		return numCars;
+	public int getNumActiveCars() {
+		return numActiveCars;
 	}
-	public void setNumCars(int numCars) {
-		this.numCars = numCars;
+	public void setNumActiveCars(int numActiveCars) {
+		this.numActiveCars = numActiveCars;
 	}
 	public List<ParticipantData> getParticipants() {
 		return participants;

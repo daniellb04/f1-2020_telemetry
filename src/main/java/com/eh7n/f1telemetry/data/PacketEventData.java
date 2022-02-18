@@ -5,17 +5,17 @@ import com.eh7n.f1telemetry.data.elements.EventType;
 
 public class PacketEventData extends Packet {
 
-	private EventType eventCode;
+	private EventType eventType;
 	private EventDataDetails eventDetails;
 
 	public PacketEventData() {}
 	
-	public EventType getEventCode() {
-		return eventCode;
+	public EventType getEventType() {
+		return eventType;
 	}
 
-	public void setEventCode(EventType eventCode) {
-		this.eventCode = eventCode;
+	public void setEventType(EventType eventType) {
+		this.eventType = eventType;
 	}
 
 	public EventDataDetails getEventDetails() {

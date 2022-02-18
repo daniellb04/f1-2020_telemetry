@@ -2,7 +2,7 @@ package com.eh7n.f1telemetry.data.elements;
 
 public class LapData {
 	
-	private float carIndex;
+	private int carIndex;
 	private boolean playersCar;
 	private float lastLapTime;
 	private float currentLapTime;
@@ -36,10 +36,10 @@ public class LapData {
 	
 	public LapData() {}
 
-	public float getCarIndex() {
+	public int getCarIndex() {
 		return carIndex;
 	}
-	public void setCarIndex(float carIndex) {
+	public void setCarIndex(int carIndex) {
 		this.carIndex = carIndex;
 	}
 	public boolean isPlayersCar() {

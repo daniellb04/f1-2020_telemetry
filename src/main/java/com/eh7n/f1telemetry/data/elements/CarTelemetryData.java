@@ -2,22 +2,41 @@ package com.eh7n.f1telemetry.data.elements;
 
 public class CarTelemetryData {
 
+	private int carIndex;
+	private boolean playersCar;
 	private int speed;
-	private int throttle;
-	private int steer;
-	private int brake;
+	private float throttle;
+	private float steer;
+	private float brake;
 	private int clutch;
 	private int gear;
 	private int engineRpm;
-	private boolean drs;
+	private boolean drsOn;
 	private int revLightsPercent;
-	private WheelData<Integer> brakeTemperature;
-	private WheelData<Integer> tireSurfaceTemperature;
-	private WheelData<Integer> tireInnerTemperature;
+	private WheelData<Integer> brakesTemperature;
+	private WheelData<Integer> tiresSurfaceTemperature;
+	private WheelData<Integer> tiresInnerTemperature;
 	private int engineTemperature;
-	private WheelData<Float> tirePressure;
+	private WheelData<Float> tiresPressure;
+	private WheelData<Integer> surfaceType;
 	
 	public CarTelemetryData() {}
+
+	public int getCarIndex() {
+		return carIndex;
+	}
+
+	public void setCarIndex(int carIndex) {
+		this.carIndex = carIndex;
+	}
+
+	public boolean isPlayersCar() {
+		return playersCar;
+	}
+
+	public void setPlayersCar(boolean playersCar) {
+		this.playersCar = playersCar;
+	}
 
 	public int getSpeed() {
 		return speed;
@@ -27,27 +46,27 @@ public class CarTelemetryData {
 		this.speed = speed;
 	}
 
-	public int getThrottle() {
+	public float getThrottle() {
 		return throttle;
 	}
 
-	public void setThrottle(int throttle) {
+	public void setThrottle(float throttle) {
 		this.throttle = throttle;
 	}
 
-	public int getSteer() {
+	public float getSteer() {
 		return steer;
 	}
 
-	public void setSteer(int steer) {
+	public void setSteer(float steer) {
 		this.steer = steer;
 	}
 
-	public int getBrake() {
+	public float getBrake() {
 		return brake;
 	}
 
-	public void setBrake(int brake) {
+	public void setBrake(float brake) {
 		this.brake = brake;
 	}
 
@@ -75,12 +94,12 @@ public class CarTelemetryData {
 		this.engineRpm = engineRpm;
 	}
 
-	public boolean isDrs() {
-		return drs;
+	public boolean isDrsOn() {
+		return drsOn;
 	}
 
-	public void setDrs(boolean drs) {
-		this.drs = drs;
+	public void setDrsOn(boolean drsOn) {
+		this.drsOn = drsOn;
 	}
 
 	public int getRevLightsPercent() {
@@ -91,28 +110,28 @@ public class CarTelemetryData {
 		this.revLightsPercent = revLightsPercent;
 	}
 
-	public WheelData<Integer> getBrakeTemperature() {
-		return brakeTemperature;
+	public WheelData<Integer> getBrakesTemperature() {
+		return brakesTemperature;
 	}
 
-	public void setBrakeTemperature(WheelData<Integer> brakeTemperature) {
-		this.brakeTemperature = brakeTemperature;
+	public void setBrakesTemperature(WheelData<Integer> brakesTemperature) {
+		this.brakesTemperature = brakesTemperature;
 	}
 
-	public WheelData<Integer> getTireSurfaceTemperature() {
-		return tireSurfaceTemperature;
+	public WheelData<Integer> getTiresSurfaceTemperature() {
+		return tiresSurfaceTemperature;
 	}
 
-	public void setTireSurfaceTemperature(WheelData<Integer> tireSurfaceTemperature) {
-		this.tireSurfaceTemperature = tireSurfaceTemperature;
+	public void setTiresSurfaceTemperature(WheelData<Integer> tiresSurfaceTemperature) {
+		this.tiresSurfaceTemperature = tiresSurfaceTemperature;
 	}
 
-	public WheelData<Integer> getTireInnerTemperature() {
-		return tireInnerTemperature;
+	public WheelData<Integer> getTiresInnerTemperature() {
+		return tiresInnerTemperature;
 	}
 
-	public void setTireInnerTemperature(WheelData<Integer> tireInnerTemperature) {
-		this.tireInnerTemperature = tireInnerTemperature;
+	public void setTiresInnerTemperature(WheelData<Integer> tiresInnerTemperature) {
+		this.tiresInnerTemperature = tiresInnerTemperature;
 	}
 
 	public int getEngineTemperature() {
@@ -123,12 +142,20 @@ public class CarTelemetryData {
 		this.engineTemperature = engineTemperature;
 	}
 
-	public WheelData<Float> getTirePressure() {
-		return tirePressure;
+	public WheelData<Float> getTiresPressure() {
+		return tiresPressure;
 	}
 
-	public void setTirePressure(WheelData<Float> tirePressure) {
-		this.tirePressure = tirePressure;
+	public void setTiresPressure(WheelData<Float> tiresPressure) {
+		this.tiresPressure = tiresPressure;
+	}
+
+	public WheelData<Integer> getSurfaceType() {
+		return surfaceType;
+	}
+
+	public void setSurfaceType(WheelData<Integer> surfaceType) {
+		this.surfaceType = surfaceType;
 	}
 
 }

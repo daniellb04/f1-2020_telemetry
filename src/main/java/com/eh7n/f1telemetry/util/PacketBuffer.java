@@ -84,7 +84,7 @@ public class PacketBuffer {
 	 * 
 	 * @return the next C uint in the byte buffer as a Java long
 	 */
-	public long getNextUIntAsLong() {
+	public long getNextUInt32AsLong() {
 		return (ba[i++] & 0xFF) | ((ba[i++] & 0xFF) << 8) | ((ba[i++] & 0xFF) << 16) | ((ba[i++] & 0xFF) << 24);
 	}
 
@@ -173,24 +173,19 @@ public class PacketBuffer {
 	 */
 	public String getNextCharArrayAsString(int count) {
 		char[] charArr = new char[count];
-		/*
-		boolean reachedEnd = false;
-		for (int k = 0; k < count; k++) {
-			char curr = (char) ba[i++];
-			if(curr == '\u0000') {
-				reachedEnd = true;
-			}else if (!reachedEnd) {
-				charArr[k] = curr;
-			}
-		}
-		*/
+
 		int k = 0;
-		while(k < count && i < ba.length) {
-			charArr[k++] = (char) ba[i++];
+		boolean reachedEnd = false;
+		while(k < count && i < ba.length && !reachedEnd) {
+			char c = (char) ba[i++];
+			if (c == '\u0000') {
+				reachedEnd = true;
+				continue;
+			}
+			charArr[k++] = c;
 			System.out.println(charArr);
 		}
 		return new String(charArr);
-
 	}
 
 	/**

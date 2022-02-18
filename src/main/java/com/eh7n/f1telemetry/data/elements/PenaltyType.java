@@ -1,70 +1,64 @@
 package com.eh7n.f1telemetry.data.elements;
 
 public enum PenaltyType {
-
-	/*
-	0 Drive through
-	1 Stop Go
-	2 Grid penalty
-	3 Penalty reminder
-	4 Time penalty
-	5 Warning
-	6 Disqualified
-	7 Removed from formation lap
-	8 Parked too long timer
-	9 Tyre regulations
-	10 This lap invalidated
-	11 This and next lap invalidated
-	12 This lap invalidated without reason
-	13 This and next lap invalidated without reason
-	14 This and previous lap invalidated
-	15 This and previous lap invalidated without reason
-	16 Retired
-	17 Black flag timer
-	*/
 	
-	UNKNOWN,
-	P1,
-	P2,
-	P3,
-	SHORT_P,
-	Q1,
-	Q2,
-	Q3,
-	SHORT_Q,
-	OSQ,
-	R,
-	R2,
-	TIME_TRIAL;
+	DRIVE_THROUGH,
+	STOP_GO,
+	GRID_PENALTY,
+	PENALTY_REMINDER,
+	TIME_PENALTY,
+	WARNING,
+	DISQUALIFIED,
+	REM_FORMATION_LAP,
+	PARKED_TOO_LONG,
+	TYRE_REGULATIONS,
+	THIS_LAP_INVALIDATED,
+	THIS_AND_NEXT_LAP_INVALIDATED,
+	THIS_LAP_INVALIDATED_WITHOUT_REASON,
+	THIS_AND_NEXT_LAP_INVALIDATED_WITHOUT_REASON,
+	THIS_AND_PREVIOUS_LAP_INVALIDATED,
+	THIS_AND_PREVIOUS_LAP_INVALIDATED_WITHOUT_REASON,
+	RETIRED,
+	BLACK_FLAG_TIMER;
 
 	public static PenaltyType fromInt(int i) {
 		switch(i) {
 			case 0:
-				return PenaltyType.UNKNOWN;
+				return PenaltyType.DRIVE_THROUGH;
 			case 1:
-				return PenaltyType.P1;
+				return PenaltyType.STOP_GO;
 			case 2:
-				return PenaltyType.P2;
+				return PenaltyType.GRID_PENALTY;
 			case 3:
-				return PenaltyType.P3;
+				return PenaltyType.PENALTY_REMINDER;
 			case 4:
-				return PenaltyType.SHORT_P;
+				return PenaltyType.TIME_PENALTY;
 			case 5:
-				return PenaltyType.Q1;
+				return PenaltyType.WARNING;
 			case 6:
-				return PenaltyType.Q2;
+				return PenaltyType.DISQUALIFIED;
 			case 7:
-				return PenaltyType.Q3;
+				return PenaltyType.REM_FORMATION_LAP;
 			case 8:
-				return PenaltyType.SHORT_Q;
+				return PenaltyType.PARKED_TOO_LONG;
 			case 9:
-				return PenaltyType.OSQ;
+				return PenaltyType.TYRE_REGULATIONS;
 			case 10:
-				return PenaltyType.R;
+				return PenaltyType.THIS_LAP_INVALIDATED;
 			case 11:
-				return PenaltyType.R2;
+				return PenaltyType.THIS_AND_NEXT_LAP_INVALIDATED;
 			case 12:
-				return PenaltyType.TIME_TRIAL;
+				return PenaltyType.THIS_LAP_INVALIDATED_WITHOUT_REASON;
+			case 13:
+				return PenaltyType.THIS_AND_NEXT_LAP_INVALIDATED_WITHOUT_REASON;
+			case 14:
+				return PenaltyType.THIS_AND_PREVIOUS_LAP_INVALIDATED;
+			case 15:
+				return PenaltyType.THIS_AND_PREVIOUS_LAP_INVALIDATED_WITHOUT_REASON;
+			case 16:
+				return PenaltyType.RETIRED;
+			case 17:
+				return PenaltyType.BLACK_FLAG_TIMER;
 			default:
 				return null;
 		}
