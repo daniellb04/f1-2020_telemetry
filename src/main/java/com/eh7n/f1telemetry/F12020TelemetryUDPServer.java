@@ -5,6 +5,8 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.DatagramChannel;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -13,7 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.eh7n.f1telemetry.packet.Packet;
-import com.eh7n.f1telemetry.util.PacketDeserializer;
+import com.eh7n.f1telemetry.packet.PacketType;
+import com.eh7n.f1telemetry.util.PacketReader;
 
 /**
  * The base class for the F1 2020 Telemetry app. Starts up a non-blocking I/O
@@ -32,7 +35,21 @@ public class F12020TelemetryUDPServer {
 
 	private static final String DEFAULT_BIND_ADDRESS = "0.0.0.0";
 	private static final int DEFAULT_PORT = 20777;
-	private static final int MAX_PACKET_SIZE = 1341;
+	private static final int MAX_PACKET_SIZE = 1464;
+	
+	//Filter of types that must be processed
+	private static final List<PacketType> PROCESSING_PACKETS = Arrays.asList(
+			PacketType.MOTION,
+			PacketType.SESSION,
+			PacketType.LAP_DATA,
+			PacketType.EVENT,
+			PacketType.PARTICIPANTS,
+			PacketType.CAR_SETUP,
+			PacketType.CAR_TELEMETRY,
+			PacketType.CAR_STATUS,
+			PacketType.FINAL_CLASSIFICATION,
+			PacketType.LOBBY_INFO
+			);
 
 	private String bindAddress;
 	private int port;
@@ -115,7 +132,7 @@ public class F12020TelemetryUDPServer {
 			while (true) {
 				try {
 				channel.receive(buf);
-				final Packet packet = PacketDeserializer.read(buf.array());
+				final Packet packet = PacketReader.read(buf.array(), PROCESSING_PACKETS);
 				executor.submit(() -> {
 					packetConsumer.accept(packet);
 				});

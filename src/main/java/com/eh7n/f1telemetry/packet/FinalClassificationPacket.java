@@ -68,10 +68,10 @@ public class FinalClassificationPacket extends Packet {
 	}
 	
 	@Override
-	public Packet build(PacketBuffer buffer, int numParticipants) {
+	public Packet build(PacketBuffer buffer) {
 		setNumCars(buffer.getNextUInt8AsInt());
 		List<FinalClassificationData> finalClassifications = new ArrayList<>();
-		for (int k = 0; k < getNumCars(); k++) {
+		for (int k = 0; k < TOTAL_NBR_CARS; k++) {
 			finalClassifications.add(buildFinalClassificationData(buffer, k, k == getHeader().getPlayerCarIndex()));
 		}
 		setFinalClassifications(finalClassifications);

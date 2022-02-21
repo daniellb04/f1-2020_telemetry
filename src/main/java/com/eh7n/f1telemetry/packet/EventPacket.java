@@ -96,7 +96,7 @@ public class EventPacket extends Packet {
 	}
 
 	@Override
-	public Packet build(PacketBuffer buffer, int numParticipants) {
+	public Packet build(PacketBuffer buffer) {
 		setEventType(EventType.fromCode(buffer.getNextCharArrayAsString(4)));
 		setEventDetails(buildEventDataDetails(buffer, getEventType()));
 		return this;

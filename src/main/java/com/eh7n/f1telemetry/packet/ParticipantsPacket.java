@@ -63,10 +63,10 @@ public class ParticipantsPacket extends Packet {
 	}
 
 	@Override
-	public Packet build(PacketBuffer buffer, int numParticipants) {
+	public Packet build(PacketBuffer buffer) {
 		setNumActiveCars(buffer.getNextUInt8AsInt());
 		List<ParticipantData> participants = new ArrayList<>();
-		for (int k = 0; k < getNumActiveCars(); k++) {
+		for (int k = 0; k < TOTAL_NBR_CARS; k++) {
 			participants.add(buildParticipantData(buffer, k, k == getHeader().getPlayerCarIndex()));
 		}
 		setParticipants(participants);

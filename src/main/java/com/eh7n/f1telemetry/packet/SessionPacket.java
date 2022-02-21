@@ -272,7 +272,7 @@ public class SessionPacket extends Packet {
 	}
 
 	@Override
-	public Packet build(PacketBuffer buffer, int numParticipants) {
+	public Packet build(PacketBuffer buffer) {
 		setWeather(Weather.fromInt(buffer.getNextUInt8AsInt()));
 		setTrackTemperature(buffer.getNextInt8AsInt());
 		setAirTemperature(buffer.getNextInt8AsInt());
@@ -289,19 +289,17 @@ public class SessionPacket extends Packet {
 		setSpectatorCarIndex(buffer.getNextUInt8AsInt());
 		setSliProNativeSupport(buffer.getNextUInt8AsBoolean());
 		setNumMarshalZones(buffer.getNextUInt8AsInt());
-		setMarshalZones(buildMarshalZones(buffer, getNumMarshalZones()));
+		setMarshalZones(buildMarshalZones(buffer));
 		setSafetyCarStatus(SafetyCarStatus.fromInt(buffer.getNextUInt8AsInt()));
 		setNetworkGame(buffer.getNextUInt8AsBoolean());
 		setNumWeatherForecastSamples(buffer.getNextUInt8AsInt());
-		setWeatherForecastSamples(buildWeatherForecastSamples(buffer, getNumWeatherForecastSamples()));
+		setWeatherForecastSamples(buildWeatherForecastSamples(buffer));
 		return this;
 	}
 
-	private List<MarshalZone> buildMarshalZones(PacketBuffer buffer, int numMarshalZones) {
+	private List<MarshalZone> buildMarshalZones(PacketBuffer buffer) {
 		List<MarshalZone> marshalZones = new ArrayList<>();
-		int num = (numMarshalZones < MAX_NBR_MARSHAL_ZONES)?
-				numMarshalZones : MAX_NBR_MARSHAL_ZONES;
-		for (int k = 0; k < num; k++) {
+		for (int k = 0; k < MAX_NBR_MARSHAL_ZONES; k++) {
 			MarshalZone marshalZone = new MarshalZone();
 			marshalZone.setZoneStart(buffer.getNextFloat());
 			marshalZone.setZoneFlag(ZoneFlag.fromInt(buffer.getNextInt8AsInt()));
@@ -310,11 +308,9 @@ public class SessionPacket extends Packet {
 		return marshalZones;
 	}
 	
-	private List<WeatherForecastSample> buildWeatherForecastSamples(PacketBuffer buffer, int numWeatherForecastSamples) {
+	private List<WeatherForecastSample> buildWeatherForecastSamples(PacketBuffer buffer) {
 		List<WeatherForecastSample> weatherForecastSamples = new ArrayList<>();
-		int num = (numWeatherForecastSamples < MAX_WEATHER_FORECAST_SAMPLES)?
-				numWeatherForecastSamples : MAX_WEATHER_FORECAST_SAMPLES;
-		for (int k = 0; k < num; k++) {
+		for (int k = 0; k < MAX_WEATHER_FORECAST_SAMPLES; k++) {
 			WeatherForecastSample weatherForecastSample = new WeatherForecastSample();
 			weatherForecastSample.setSessionType(SessionType.fromInt(buffer.getNextUInt8AsInt()));
 			weatherForecastSample.setTimeOffset(buffer.getNextUInt8AsInt());

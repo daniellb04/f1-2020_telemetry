@@ -217,9 +217,9 @@ public class MotionPacket extends Packet {
 	}
 
 	@Override
-	public Packet build(PacketBuffer buffer, int numParticipants) {
+	public Packet build(PacketBuffer buffer) {
 		List<CarMotionData> carMotionDataList = new ArrayList<>();
-		for (int carIndex = 0; carIndex < numParticipants; carIndex++) {
+		for (int carIndex = 0; carIndex < TOTAL_NBR_CARS; carIndex++) {
 			carMotionDataList.add(buildCarMotionData(buffer, carIndex, carIndex == getHeader().getPlayerCarIndex()));
 		}
 		setCarMotionDataList(carMotionDataList);

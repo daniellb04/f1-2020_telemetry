@@ -1,5 +1,8 @@
 package com.eh7n.f1telemetry.util;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.eh7n.f1telemetry.packet.CarSetupPacket;
 import com.eh7n.f1telemetry.packet.CarStatusPacket;
 import com.eh7n.f1telemetry.packet.CarTelemetryPacket;
@@ -15,72 +18,85 @@ import com.eh7n.f1telemetry.packet.ParticipantsPacket;
 import com.eh7n.f1telemetry.packet.SessionPacket;
 
 /**
- * F1 2020 PacketDeserializer is the main class for deserializing the incoming
- * UDP packets and building Packet POJOs from the byte arrays
- * 
- * This class was created based on the documented UDP Specification located on
- * the Codemasters forums.
- * 
- * @author eh7n
- * @see https://forums.codemasters.com/topic/50942-f1-2020-udp-specification
- *
+ * F1 2020 PacketReader is the master class for reading and construct
+ * the packet object from the incoming UDP packets
  */
-public class PacketDeserializer {
+public class PacketReader {
 	
-	private static int currentNumParticipants = 0;
-
+	private static final List<PacketType> ALL_PACKETS = Arrays.asList(
+			PacketType.MOTION,
+			PacketType.SESSION,
+			PacketType.LAP_DATA,
+			PacketType.EVENT,
+			PacketType.PARTICIPANTS,
+			PacketType.CAR_SETUP,
+			PacketType.CAR_TELEMETRY,
+			PacketType.CAR_STATUS,
+			PacketType.FINAL_CLASSIFICATION,
+			PacketType.LOBBY_INFO
+			);
+	
 	private PacketBuffer buffer;
 
-	private PacketDeserializer(byte[] data) {
+	private PacketReader(byte[] data) {
 		buffer = PacketBuffer.wrap(data);
 	}
 
 	/**
-	 * Read the packet data from a byte array
+	 * Read all types of packet data from a byte array
 	 * 
 	 * @param data : a F1 2020 UDP packet
 	 * @return a Packet POJO
 	 */
 	public static Packet read(byte[] data) {
-		return new PacketDeserializer(data).buildPacket();
+		return read(data, ALL_PACKETS);
 	}
 
-	private Packet buildPacket() {
+	/**
+	 * Read specific types of packet data from a byte array
+	 * 
+	 * @param data : a F1 2020 UDP packet
+	 * @param types : a list of types that must be processed
+	 * @return a Packet POJO or null if the packet type isn't in the list
+	 */
+	public static Packet read(byte[] data, List<PacketType> types) {
+		return new PacketReader(data).buildPacket(types);
+	}
+
+	private Packet buildPacket(List<PacketType> types) {
 
 		Header header = buildHeader();
+		PacketType packetType = PacketType.fromInt(header.getPacketId());
+		
+		if (!types.contains(packetType))
+			return null;
 
-		switch (PacketType.fromInt(header.getPacketId())) {
+		switch (packetType) {
 			case MOTION:
-				return build(new MotionPacket().withHeader(header));
+				return new MotionPacket().withHeader(header).build(buffer);
 			case SESSION:
-				return build(new SessionPacket().withHeader(header));
+				return new SessionPacket().withHeader(header).build(buffer);
 			case LAP_DATA:
-				return build(new LapDataPacket().withHeader(header));
+				return new LapDataPacket().withHeader(header).build(buffer);
 			case EVENT:
-				return build(new EventPacket().withHeader(header));
+				return new EventPacket().withHeader(header).build(buffer);
 			case PARTICIPANTS:
-				ParticipantsPacket packet = (ParticipantsPacket) build(new ParticipantsPacket().withHeader(header));
-				currentNumParticipants = packet.getNumActiveCars();
-				return packet;
+				return new ParticipantsPacket().withHeader(header).build(buffer);
 			case CAR_SETUP:
-				return build(new CarSetupPacket().withHeader(header));
+				return new CarSetupPacket().withHeader(header).build(buffer);
 			case CAR_TELEMETRY:
-				return build(new CarTelemetryPacket().withHeader(header));
+				return new CarTelemetryPacket().withHeader(header).build(buffer);
 			case CAR_STATUS:
-				return build(new CarStatusPacket().withHeader(header));
+				return new CarStatusPacket().withHeader(header).build(buffer);
 			case FINAL_CLASSIFICATION:
-				return build(new FinalClassificationPacket().withHeader(header));
+				return new FinalClassificationPacket().withHeader(header).build(buffer);
 			case LOBBY_INFO:
-				return build(new LobbyInfoPacket().withHeader(header));
+				return new LobbyInfoPacket().withHeader(header).build(buffer);
 		}
 
 		return null;
 	}
 	
-	private Packet build(Packet packet) {
-		return packet.build(buffer, currentNumParticipants);
-	}
-
 	/**
 	 * HEADER
 	 * 

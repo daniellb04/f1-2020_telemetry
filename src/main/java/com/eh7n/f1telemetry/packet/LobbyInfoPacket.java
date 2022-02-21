@@ -58,10 +58,10 @@ public class LobbyInfoPacket extends Packet {
 		this.lobbyPlayers = lobbyPlayers;
 	}
 	@Override
-	public Packet build(PacketBuffer buffer, int numParticipants) {
+	public Packet build(PacketBuffer buffer) {
 		setNumPlayers(buffer.getNextUInt8AsInt());
 		List<LobbyInfoData> lobbyInfos = new ArrayList<>();
-		for (int k = 0; k < getNumPlayers(); k++) {
+		for (int k = 0; k < TOTAL_NBR_CARS; k++) {
 			lobbyInfos.add(buildLobbyInfoData(buffer, k, k == getHeader().getPlayerCarIndex()));
 		}
 		setLobbyPlayers(lobbyInfos);

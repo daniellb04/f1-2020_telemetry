@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public abstract class Packet {
 	
+	public static final int TOTAL_NBR_CARS=22;
+	
 	private PacketType type;
 	private Header header;
 
@@ -38,6 +40,6 @@ public abstract class Packet {
 		return this;
 	}
 	
-	public abstract Packet build(PacketBuffer buffer, int numParticipants);
+	public abstract Packet build(PacketBuffer buffer);
 
 }

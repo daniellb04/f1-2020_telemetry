@@ -49,6 +49,16 @@ public class PacketBuffer {
 		}
 		return next;
 	}
+	
+	public byte[] getLastBytes() {
+		int size = ba.length - i;
+		byte[] last = new byte[size];
+		int j = 0;
+		while (j < size) {
+			last[j++] = ba[i++];
+		}
+		return last;
+	}
 
 	/**
 	 * Gets and converts the next byte from an unsigned 8bit int to a signed int
@@ -185,20 +195,18 @@ public class PacketBuffer {
 	 */
 	public String getNextCharArrayAsString(int count) {
 		char[] charArr = new char[count];
-
-		int k = 0;
 		boolean reachedEnd = false;
-		while(k < count && i < ba.length && !reachedEnd) {
-			char c = (char) ba[i++];
-			if (c == '\u0000') {
+		for (int k = 0; k < count; k++) {
+			char curr = (char) ba[i++];
+			if(curr == '\u0000') {
 				reachedEnd = true;
-				System.out.println("Leu Null");
-				continue;
 			}
-			charArr[k++] = c;
-			System.out.println(charArr);
+			else if (!reachedEnd) {
+				charArr[k] = curr;
+			}
 		}
 		return new String(charArr);
+
 	}
 
 	/**

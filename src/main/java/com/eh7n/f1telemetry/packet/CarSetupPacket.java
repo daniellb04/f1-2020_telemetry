@@ -67,9 +67,9 @@ public class CarSetupPacket extends Packet {
 	}
 
 	@Override
-	public Packet build(PacketBuffer buffer, int numParticipants) {
+	public Packet build(PacketBuffer buffer) {
 		List<CarSetupData> carSetups = new ArrayList<>();
-		for (int k = 0; k < numParticipants; k++) {
+		for (int k = 0; k < TOTAL_NBR_CARS; k++) {
 			carSetups.add(buildCarSetupData(buffer, k, k == getHeader().getPlayerCarIndex()));
 		}
 		setCarSetups(carSetups);

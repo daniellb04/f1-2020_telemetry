@@ -79,9 +79,9 @@ public class LapDataPacket extends Packet {
 	}
 
 	@Override
-	public Packet build(PacketBuffer buffer, int numParticipants) {
+	public Packet build(PacketBuffer buffer) {
 		List<LapData> lapDataList = new ArrayList<>();
-		for (int i = 0; i < numParticipants; i++) {
+		for (int i = 0; i < TOTAL_NBR_CARS; i++) {
 			lapDataList.add(buildLapData(buffer, i, i == getHeader().getPlayerCarIndex()));
 		}
 		setLapDataList(lapDataList);

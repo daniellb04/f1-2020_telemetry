@@ -108,9 +108,9 @@ public class CarTelemetryPacket extends Packet {
 	}
 
 	@Override
-	public Packet build(PacketBuffer buffer, int numParticipants) {
+	public Packet build(PacketBuffer buffer) {
 		List<CarTelemetryData> carsTelemetry = new ArrayList<>();
-		for (int k = 0; k < numParticipants; k++) {
+		for (int k = 0; k < TOTAL_NBR_CARS; k++) {
 			carsTelemetry.add(buildCarTelemetryData(buffer, k, k == getHeader().getPlayerCarIndex()));
 		}
 		setCarTelemetryData(carsTelemetry);
