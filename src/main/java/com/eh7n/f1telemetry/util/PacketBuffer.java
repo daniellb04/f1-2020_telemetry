@@ -108,6 +108,18 @@ public class PacketBuffer {
 	}
 
 	/**
+	 * Gets and converts the next 64bits as a double
+	 * 
+	 * @return the next C double as a Java double
+	 */
+	public double getNextDouble() {
+		long doubleAsLong = (long)(ba[i++] & 0xFF) | (long)((ba[i++] & 0xFF) << 8) | (long)((ba[i++] & 0xFF) << 16)
+				| (long)((ba[i++] & 0xFF) << 24) | (long)((ba[i++] & 0xFF) << 32) | (long)((ba[i++] & 0xFF) << 40) 
+				| (long)((ba[i++] & 0xFF) << 48) | (long)((ba[i++] & 0xFF) << 56);
+		return Double.longBitsToDouble(doubleAsLong);
+	}
+
+	/**
 	 * Gets and converts the next 32bits as a float
 	 * 
 	 * @return the next C float as a Java float
@@ -180,6 +192,7 @@ public class PacketBuffer {
 			char c = (char) ba[i++];
 			if (c == '\u0000') {
 				reachedEnd = true;
+				System.out.println("Leu Null");
 				continue;
 			}
 			charArr[k++] = c;

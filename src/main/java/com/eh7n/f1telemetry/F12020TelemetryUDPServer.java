@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eh7n.f1telemetry.data.Packet;
+import com.eh7n.f1telemetry.packet.Packet;
 import com.eh7n.f1telemetry.util.PacketDeserializer;
 
 /**
@@ -113,12 +113,19 @@ public class F12020TelemetryUDPServer {
 			ByteBuffer buf = ByteBuffer.allocate(MAX_PACKET_SIZE);
 			buf.order(ByteOrder.LITTLE_ENDIAN);
 			while (true) {
+				try {
 				channel.receive(buf);
 				final Packet packet = PacketDeserializer.read(buf.array());
 				executor.submit(() -> {
 					packetConsumer.accept(packet);
 				});
 				buf.clear();
+				}
+				catch(Exception e) {
+					e.printStackTrace();
+					buf.clear();
+					continue;
+				}
 			}
 		} finally {
 			executor.shutdown();
