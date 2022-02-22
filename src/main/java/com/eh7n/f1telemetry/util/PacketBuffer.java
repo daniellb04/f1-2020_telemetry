@@ -1,6 +1,7 @@
 package com.eh7n.f1telemetry.util;
 
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 
 /**
  * A wrapper for the byte array to make deserializing the data easier.
@@ -50,6 +51,11 @@ public class PacketBuffer {
 		return next;
 	}
 	
+	/**
+	 * Gets the last set of bytes based on current position of buffer
+	 * 
+	 * @return the last byte[] based on the current position
+	 */
 	public byte[] getLastBytes() {
 		int size = ba.length - i;
 		byte[] last = new byte[size];
@@ -123,10 +129,7 @@ public class PacketBuffer {
 	 * @return the next C double as a Java double
 	 */
 	public double getNextDouble() {
-		long doubleAsLong = (long)(ba[i++] & 0xFF) | (long)((ba[i++] & 0xFF) << 8) | (long)((ba[i++] & 0xFF) << 16)
-				| (long)((ba[i++] & 0xFF) << 24) | (long)((ba[i++] & 0xFF) << 32) | (long)((ba[i++] & 0xFF) << 40) 
-				| (long)((ba[i++] & 0xFF) << 48) | (long)((ba[i++] & 0xFF) << 56);
-		return Double.longBitsToDouble(doubleAsLong);
+		return ByteBuffer.wrap(getNextBytes(8)).getDouble();
 	}
 
 	/**
@@ -234,10 +237,6 @@ public class PacketBuffer {
 	 */
 	public boolean hasNext() {
 		return i < (ba.length - 1);
-	}
-	
-	public void skip(int num) {
-		i += num;
 	}
 
 	public String toString() {

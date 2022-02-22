@@ -51,6 +51,8 @@ import com.eh7n.f1telemetry.util.PacketBuffer;
  */
 public class FinalClassificationPacket extends Packet {
 	
+	public static final int MAX_NBR_TYRE_STINTS=8;
+	
 	private int numCars;
 	private List<FinalClassificationData> finalClassifications;
 	
@@ -92,15 +94,14 @@ public class FinalClassificationPacket extends Packet {
 		finalClassificationData.setTotalRaceTime(buffer.getNextDouble());
 		finalClassificationData.setPenaltiesTime(buffer.getNextUInt8AsInt());
 		finalClassificationData.setNumPenalties(buffer.getNextUInt8AsInt());
-		int numTyreStints = buffer.getNextUInt8AsInt();
-		finalClassificationData.setNumTyreStints(numTyreStints);
+		finalClassificationData.setNumTyreStints(buffer.getNextUInt8AsInt());
 		List<Integer> tyreStintsActual = new ArrayList<>();
-		for (int i = 0; i < numTyreStints; i++) {
+		for (int i = 0; i < MAX_NBR_TYRE_STINTS; i++) {
 			tyreStintsActual.add(buffer.getNextUInt8AsInt());
 		}
 		finalClassificationData.setTyreStintsActual(tyreStintsActual);
 		List<Integer> tyreStintsVisual = new ArrayList<>();
-		for (int i = 0; i < numTyreStints; i++) {
+		for (int i = 0; i < MAX_NBR_TYRE_STINTS; i++) {
 			tyreStintsVisual.add(buffer.getNextUInt8AsInt());
 		}
 		finalClassificationData.setTyreStintsVisual(tyreStintsVisual);
