@@ -3,12 +3,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.eh7n</groupId>
-	<artifactId>com.eh7n.f1-2020_telemetry</artifactId>
+	<artifactId>f1-2020_telemetry</artifactId>
 	<version>1.0</version>
 	<name>F1 2020 Telemetry Server</name>
 	<properties>
-		<maven.compiler.source>1.11</maven.compiler.source>
-		<maven.compiler.target>1.11</maven.compiler.target>
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
 	</properties>
 	<dependencies>
 		<dependency>
