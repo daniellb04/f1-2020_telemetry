@@ -208,7 +208,7 @@ public class PacketBuffer {
 				charArr[k] = curr;
 			}
 		}
-		return new String(charArr);
+		return new String(charArr).trim(); //remove trailing null char
 
 	}
 
