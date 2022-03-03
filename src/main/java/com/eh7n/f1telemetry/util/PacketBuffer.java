@@ -65,6 +65,15 @@ public class PacketBuffer {
 		}
 		return last;
 	}
+	
+	/**
+	 * Gets all bytes of buffer
+	 * 
+	 * @return the entire byte[]
+	 */
+	public byte[] getAllBytes() {
+		return ba;
+	}
 
 	/**
 	 * Gets and converts the next byte from an unsigned 8bit int to a signed int

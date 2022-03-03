@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import com.eh7n.f1telemetry.packet.Packet;
 import com.eh7n.f1telemetry.packet.PacketType;
-import com.eh7n.f1telemetry.util.PacketReader;
+import com.eh7n.f1telemetry.util.PacketProcessor;
 
 /**
  * The base class for the F1 2020 Telemetry app. Starts up a non-blocking I/O
@@ -54,6 +54,7 @@ public class F12020TelemetryUDPServer {
 
 	private String bindAddress;
 	private int port;
+	private String dbFile;
 	private List<PacketType> processingPacketTypes;
 	private Consumer<Packet> packetConsumer;
 
@@ -80,6 +81,17 @@ public class F12020TelemetryUDPServer {
 	 */
 	public F12020TelemetryUDPServer bindTo(String bindAddress) {
 		this.bindAddress = bindAddress;
+		return this;
+	}
+	
+	/**
+	 * Set the filename of recording sqlite db
+	 * 
+	 * @param dbfile
+	 * @return the server instance
+	 */
+	public F12020TelemetryUDPServer recordingOn(String dbfile) {
+		this.dbFile = dbfile;
 		return this;
 	}
 	
@@ -144,14 +156,16 @@ public class F12020TelemetryUDPServer {
 			log.info("Listening on " + ip + ":" + port + "...");
 			ByteBuffer buf = ByteBuffer.allocate(MAX_PACKET_SIZE);
 			buf.order(ByteOrder.LITTLE_ENDIAN);
+			PacketProcessor packetProcessor = PacketProcessor.create(dbFile, processingPacketTypes);
 			while (true) {
 				try {
-				channel.receive(buf);
-				final Packet packet = PacketReader.read(buf.array(), processingPacketTypes);
-				executor.submit(() -> {
-					packetConsumer.accept(packet);
-				});
-				buf.clear();
+					channel.receive(buf);
+					byte[] data = buf.array();
+					final Packet packet = packetProcessor.process(data);
+					executor.submit(() -> {
+						packetConsumer.accept(packet);
+					});
+					buf.clear();
 				}
 				catch(Exception e) {
 					e.printStackTrace();
@@ -159,6 +173,8 @@ public class F12020TelemetryUDPServer {
 					continue;
 				}
 			}
+		} catch (Exception e1) {
+			e1.printStackTrace();
 		} finally {
 			executor.shutdown();
 		}
@@ -176,6 +192,7 @@ public class F12020TelemetryUDPServer {
 		F12020TelemetryUDPServer.create()
 							.bindTo("0.0.0.0")
 							.onPort(20777)
+							.recordingOn("telemetry.db")
 							.consumeWith((p) -> {
 									log.trace(p.toJSON());
 								})

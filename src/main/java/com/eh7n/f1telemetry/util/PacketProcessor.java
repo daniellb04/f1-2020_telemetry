@@ -1,5 +1,6 @@
 package com.eh7n.f1telemetry.util;
 
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,10 +19,10 @@ import com.eh7n.f1telemetry.packet.ParticipantsPacket;
 import com.eh7n.f1telemetry.packet.SessionPacket;
 
 /**
- * F1 2020 PacketReader is the master class for reading and construct
+ * F1 2020 PacketProcessor is the master class for reading, construct and save
  * the packet object from the incoming UDP packets
  */
-public class PacketReader {
+public class PacketProcessor {
 	
 	private static final List<PacketType> ALL_PACKETS = Arrays.asList(
 			PacketType.MOTION,
@@ -37,35 +38,58 @@ public class PacketReader {
 			);
 	
 	private PacketBuffer buffer;
+	private PacketDB db;
+	private List<PacketType> types;
 
-	private PacketReader(byte[] data) {
-		buffer = PacketBuffer.wrap(data);
+	private PacketProcessor(String dbfile, List<PacketType> types) throws Exception {
+		if (dbfile != null) {
+			db = new PacketDB(dbfile);
+			db.initDB();
+		}
+		this.types = types;
 	}
 
 	/**
-	 * Read all types of packet data from a byte array
+	 * Create a PacketProcessor for all types of packet data
+	 * 
+	 * @param dbfile : a file location to write packets sqlite db. Don't write if null.
+	 * @return a PacketProcessor instance
+	 * @throws Exception 
+	 */
+	public static PacketProcessor create(String dbfile) throws Exception {
+		return create(dbfile, ALL_PACKETS);
+	}
+
+	/**
+	 * Create a PacketProcessor for specific types of packet data
+	 * 
+	 * @param dbfile : a file location to write packets sqlite db. Don't write if null.
+	 * @param types : a list of types that must be processed
+	 * @return a PacketProcessor instance
+	 * @throws Exception 
+	 */
+	public static PacketProcessor create(String dbfile, List<PacketType> types) throws Exception {
+		return new PacketProcessor(dbfile, types);
+	}
+	
+	/**
+	 * Process byte array udp data and build a packet object
 	 * 
 	 * @param data : a F1 2020 UDP packet
 	 * @return a Packet POJO
+	 * @throws Exception 
 	 */
-	public static Packet read(byte[] data) {
-		return read(data, ALL_PACKETS);
+	public Packet process(byte[] data) throws Exception {
+		buffer = PacketBuffer.wrap(data);
+		return buildPacket();
 	}
 
-	/**
-	 * Read specific types of packet data from a byte array
-	 * 
-	 * @param data : a F1 2020 UDP packet
-	 * @param types : a list of types that must be processed
-	 * @return a Packet POJO or null if the packet type isn't in the list
-	 */
-	public static Packet read(byte[] data, List<PacketType> types) {
-		return new PacketReader(data).buildPacket(types);
-	}
-
-	private Packet buildPacket(List<PacketType> types) {
+	private Packet buildPacket() throws SQLException {
 
 		Header header = buildHeader();
+		if (db != null)
+			db.insert(header, buffer.getAllBytes());
+		
 		PacketType packetType = PacketType.fromInt(header.getPacketId());
 		
 		if (!types.contains(packetType))
