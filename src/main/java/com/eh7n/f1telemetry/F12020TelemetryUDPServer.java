@@ -192,7 +192,6 @@ public class F12020TelemetryUDPServer {
 		F12020TelemetryUDPServer.create()
 							.bindTo("0.0.0.0")
 							.onPort(20777)
-							.recordingOn("telemetry.db")
 							.consumeWith((p) -> {
 									log.trace(p.toJSON());
 								})

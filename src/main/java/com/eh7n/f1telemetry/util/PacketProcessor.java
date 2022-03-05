@@ -87,10 +87,10 @@ public class PacketProcessor {
 	private Packet buildPacket() throws SQLException {
 
 		Header header = buildHeader();
-		if (db != null)
-			db.insert(header, buffer.getAllBytes());
-		
 		PacketType packetType = PacketType.fromInt(header.getPacketId());
+		
+		if (db != null && !PacketType.LOBBY_INFO.equals(packetType))
+			db.insert(header, buffer.getAllBytes());
 		
 		if (!types.contains(packetType))
 			return null;
